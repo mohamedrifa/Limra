@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "422137489540",
+    "project_id": "limra-7ba51",
+    "storage_bucket": "limra-7ba51.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422137489540:android:b054531093eae4c957fad1",
+        "android_client_info": {
+          "package_name": "com.jasimapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChgI_NH_sQuKKx9hUSNPRd1FbLHf2FiIw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
