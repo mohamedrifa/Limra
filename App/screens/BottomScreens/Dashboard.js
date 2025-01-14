@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StatusBar} from 'react-native';
 
 const Dashboard = () => (
   <View style={styles.container}>
+    <StatusBar hidden={true}/>
     <Text>Dashboard</Text>
   </View>
 );

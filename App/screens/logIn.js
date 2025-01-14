@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import auth from '@react-native-firebase/auth';
-import {View,Text,TouchableOpacity,StyleSheet,ImageBackground,Image,TextInput,Alert,} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image, TextInput, Alert, StatusBar} from 'react-native';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -30,6 +30,7 @@ const Login = ({ navigation }) => {
       style={styles.background}
       resizeMode="cover">
       <View style={styles.page}>
+        <StatusBar hidden={true} />
         <Image source={require('../assets/images/LIMRA.png')} style={styles.title} />
         <View style={styles.line} />
         <Text style={styles.text}>Get started to your personal account</Text>

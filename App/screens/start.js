@@ -1,6 +1,6 @@
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image, StatusBar} from 'react-native';
 
 const Start = ({ onNext }) => (
     <ImageBackground
@@ -8,6 +8,7 @@ const Start = ({ onNext }) => (
         style={styles.background}
         resizeMode="cover">
         <View style={styles.page}>
+            <StatusBar hidden={true} />
             <Image 
                 source={require('../assets/images/LIMRA.png')}  // Ensure this path is correct
                 style={styles.image}/>
