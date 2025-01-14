@@ -12,9 +12,11 @@ const Login = ({ navigation }) => {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
+    const updatedEmail = email.includes('@gmail.com') ? email : email + '@gmail.com';
+    const updatedPassword = password.length >= 6 ? password : password + '1234';
 
     try {
-      await auth().signInWithEmailAndPassword(email, password);
+      await auth().signInWithEmailAndPassword(updatedEmail, updatedPassword);
       Alert.alert('Success', 'You are logged in!');
       navigation.navigate("ApplicationMain");
     } catch (error) {

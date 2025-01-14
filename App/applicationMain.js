@@ -49,6 +49,7 @@ export default function applicationMain() {
           );
         },
         tabBarShowLabel: false,
+        headerShown: false,
         tabBarStyle: {
           height: 67,
         },
