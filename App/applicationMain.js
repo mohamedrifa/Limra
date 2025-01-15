@@ -1,25 +1,26 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, Pressable} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Dashboard from './screens/BottomScreens/Dashboard';
 import ServiceAdd from './screens/BottomScreens/ServiceAdd';
 import Bill from './screens/BottomScreens/Bill';
 import Messages from './screens/BottomScreens/Messages';
 import Settings from './screens/BottomScreens/Settings';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
 export default function applicationMain() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
           let icon;
-
           if (route.name === 'Dashboard') {
             icon = focused
-              ? require('./assets/BottomNavVector/Dashboard1.png') // Active icon
-              : require('./assets/BottomNavVector/Dashboard.png'); // Inactive icon
+              ? require('./assets/BottomNavVector/Dashboard1.png')
+              : require('./assets/BottomNavVector/Dashboard.png'); 
           } else if (route.name === 'ServiceAdd') {
             icon = focused
               ? require('./assets/BottomNavVector/ServiceAdd1.png')
@@ -52,9 +53,22 @@ export default function applicationMain() {
         headerShown: false,
         tabBarStyle: {
           height: 67,
+          marginBottom: insets.bottom,
         },
+        tabBarButton: (props) => (
+          <Pressable
+            {...props}
+            android_ripple={{ borderless: false, color: 'transparent' }}
+            style={({ pressed }) => [
+              { 
+                opacity: pressed ? 0.8 : 1, 
+                alignItems: 'center',
+              },
+            ]}
+          />
+        ),
         tabBarIconStyle: {
-          height: 55,
+          height: 67,
         }
       })}
     >
