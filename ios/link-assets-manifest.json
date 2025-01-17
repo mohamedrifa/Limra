@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "App/assets/fonts/Open Sans Light.ttf",
+      "sha1": "ecdf1d58c0932a775c89b5ad48a7a0aaad66de4f"
+    },
+    {
+      "path": "App/assets/fonts/Poppins.ttf",
+      "sha1": "fdd3002e7d814ee47c1c1b8487c72c6bbb3a2d00"
+    },
+    {
+      "path": "App/assets/fonts/Quando.ttf",
+      "sha1": "49c29dfb50a813a2e688a3e49970d4a276238ae9"
+    },
+    {
+      "path": "App/assets/fonts/Quantico.ttf",
+      "sha1": "8e3ddbe4ed600c60d126907bb391fdcd67dd0263"
+    },
+    {
+      "path": "App/assets/fonts/Questrial.ttf",
+      "sha1": "6f9756a98f1a5f3a0ce0611b4176f0dfa6fe2d0d"
+    }
+  ]
+}

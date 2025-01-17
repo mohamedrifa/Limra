@@ -1,5 +1,5 @@
 {
-  "name": "JasimApp",
+  "name": "jasim-app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,11 +10,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-firebase/app": "^21.6.2",
     "@react-native-firebase/auth": "^21.6.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
+    "moment": "^2.30.1",
     "react": "18.3.1",
     "react-native": "0.76.5",
     "react-native-gesture-handler": "^2.22.0",

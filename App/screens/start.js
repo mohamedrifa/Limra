@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#F2E9E4',
-    fontFamily:'open-sans',
+    fontFamily:'Open Sans Light ',
     fontWeight:400,
     fontSize: 20,
     textAlign: 'center',
