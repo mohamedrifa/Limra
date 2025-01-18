@@ -1,0 +1,15 @@
+{
+    "customers": {
+      "customer1": {
+        "name": "John Doe",
+        "address": "123 Main St, City",
+        "machine": "Washing Machine"
+      },
+      "customer2": {
+        "name": "Jane Smith",
+        "address": "456 Market St, City",
+        "machine": "Refrigerator"
+      }
+    }
+  }
+  
