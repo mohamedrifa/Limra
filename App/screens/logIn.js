@@ -30,7 +30,6 @@ const Login = ({ navigation }) => {
       style={styles.background}
       resizeMode="cover">
       <View style={styles.page}>
-        <StatusBar hidden={true} />
         <Image source={require('../assets/images/LIMRA.png')} style={styles.title} />
         <View style={styles.line} />
         <Text style={styles.text}>Get started to your personal account</Text>

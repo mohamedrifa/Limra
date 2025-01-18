@@ -1,15 +1,21 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native';
 import moment from 'moment';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../../../firebase';
+import { Linking } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import DatePicker from 'react-native-date-picker';
 
 const ServiceAdd = () => {
+
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const dates = Array.from({ length: 7 }, (_, i) =>
     moment().add(i, 'days').format('YYYY-MM-DD')
   );
-
   const [customers, setCustomers] = useState([]);
   useEffect(() => {
     const customerRef = ref(database, 'customers');
@@ -34,11 +40,37 @@ const ServiceAdd = () => {
     return () => unsubscribe(); 
   }, []);
 
+  const openWhatsApp = (mobileNumber) => {
+    const number = mobileNumber || "8903677609"; // Fallback if mobileNumber is undefined
+    const whatsappUrl = `https://wa.me/${number}`;
+    try {
+      return Linking.openURL(whatsappUrl);
+    }catch (error) {
+      Alert.alert("Error","Unable to open WhatsApp");
+    }
+    return Linking.openURL(whatsappUrl);
+  };
+  const openDialPad = async (mobileNumber) => {
+    const number = mobileNumber || "8903677609"; // Fallback if mobileNumber is undefined
+    const dialUrl = `tel:${number}`;
+    try {
+      return await Linking.openURL(dialUrl);
+    } catch (err) {
+      Alert.alert("Error","Unable to open Dial Pad");
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
       <View style={styles.container}>
         <View style={styles.titleView}>
-          <Text style={styles.title}>Today</Text>
+          <Text style={styles.title}>
+            {selectedDate === moment().format('YYYY-MM-DD')
+            ? 'Today'
+            : selectedDate === moment().add(1, 'days').format('YYYY-MM-DD')
+            ? 'Tomorrow'
+            : moment(selectedDate).format('DD-MM-YYYY')}
+          </Text>
           <TouchableOpacity>
             <Image source={require('../../assets/vectors/search.png')} style={styles.search} />
           </TouchableOpacity>
@@ -47,11 +79,24 @@ const ServiceAdd = () => {
           <FlatList
             data={dates}
             horizontal
+            showsHorizontalScrollIndicator={false}
             style={styles.dateFlat}
             keyExtractor={(item) => item}
             ListFooterComponent={
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setOpen(true)} >
               <Image source={require('../../assets/vectors/allDate.png')} style={styles.allDate} />
+              <DatePicker
+                modal
+                open={open}
+                date={date}
+                mode="date" // Can be 'date', 'time', or 'datetime'
+                onConfirm={(selectedDate) => {
+                  setOpen(false);
+                  setDate(selectedDate);
+                  setSelectedDate(moment(selectedDate).format('YYYY-MM-DD'));
+                }}
+                onCancel={() => setOpen(false)}
+              />
             </TouchableOpacity>
             }
             renderItem={({ item }) => (
@@ -88,16 +133,34 @@ const ServiceAdd = () => {
           <FlatList
             data={customers}
             style={{ marginTop: 10 }}
+            showsVerticalScrollIndicator={false}
             ListFooterComponent={<View style={{height: 10}} />}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.card}>
                 <View style={styles.listLine}/>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.address}>{item.address}</Text>
-                <Text style={styles.machine}>{item.machine}</Text>
-                <Text>{item.mobile}</Text>
-                <Text>{item.city}</Text>
+                <View style={styles.listView}>
+                  <View style={styles.listDatas}>
+                    <ScrollView style={styles.listDatas} showsVerticalScrollIndicator={false}>
+                      <Text style={styles.name}>{item.name}</Text>
+                      <Text style={styles.city}>{item.city}</Text>
+                      <Text style={styles.address}>{item.address}</Text>
+                      <Text style={styles.machine}>{item.machine}</Text>
+                      <Text style={styles.mobile}>{item.mobile}</Text>
+                    </ScrollView>
+                  </View>
+                  <View style={styles.listIcons}>
+                    <TouchableOpacity>
+                      <Image source={require('../../assets/vectors/edit.png')} style={{width: 24, height: 24}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
+                      <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 24, height: 24}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
+                      <Image source={require('../../assets/vectors/call.png')} style={{width: 24, height: 24}} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
                 <View style={styles.listLine}/>
               </View>
             )}
@@ -202,15 +265,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 10,
   },
+  listLine: {
+    width: '100%',
+    height: 0.5,
+    backgroundColor: '#22223B',
+  },
   card: {
     width: '100%',
     height: 215,
     justifyContent: 'space-between',
   },
-  listLine: {
-    width: '100%',
-    height: 0.5,
-    backgroundColor: '#22223B',
+  listView: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listDatas: {
+    width: 214,
+    height: 195,
+  },
+  name: {
+    fontSize: 20,
+    color: '#22223B',
+    fontFamily: 'Poppins',
+    marginBottom: 10,
+    fontWeight: '400',
+  },
+  city: {
+    fontSize: 14,
+    color: '#22223B',
+    fontFamily: 'Poppins',
+    marginBottom: 10,
+    fontWeight: '400',
+  },
+  address: {
+    fontSize: 14,
+    color: '#22223B',
+    fontFamily: 'Poppins',
+    marginBottom: 10,
+    fontWeight: '400',
+  },
+  machine: {
+    fontSize: 14,
+    color: '#22223B',
+    fontFamily: 'Poppins',
+    marginBottom: 10,
+    fontWeight: '400',
+  },
+  mobile: {
+    fontSize: 14,
+    color: '#22223B',
+    fontFamily: 'Quantico',
+    fontWeight: '400',
+  },
+  listIcons: {
+    width: 92,
+    height: 24,
+    marginLeft: 10,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
   },
 });
 

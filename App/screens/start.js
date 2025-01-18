@@ -8,7 +8,6 @@ const Start = ({ onNext }) => (
         style={styles.background}
         resizeMode="cover">
         <View style={styles.page}>
-            <StatusBar hidden={true} />
             <Image 
                 source={require('../assets/images/LIMRA.png')}  // Ensure this path is correct
                 style={styles.image}/>
