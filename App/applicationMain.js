@@ -6,12 +6,10 @@ import ServiceAdd from './screens/BottomScreens/ServiceAdd';
 import Bill from './screens/BottomScreens/Bill';
 import Messages from './screens/BottomScreens/Messages';
 import Settings from './screens/BottomScreens/Settings';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator();
 
 export default function applicationMain() {
-  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,7 +36,6 @@ export default function applicationMain() {
               ? require('./assets/BottomNavVector/Settings1.png')
               : require('./assets/BottomNavVector/Settings.png');
           }
-
           return (
             <Image
               source={icon}
@@ -53,7 +50,6 @@ export default function applicationMain() {
         headerShown: false,
         tabBarStyle: {
           height: 67,
-          marginBottom: insets.bottom,
         },
         tabBarButton: (props) => (
           <Pressable

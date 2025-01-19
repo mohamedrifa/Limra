@@ -5,6 +5,7 @@ import firebase from '@react-native-firebase/app';
 import auth from '@react-native-firebase/auth';
 import LoginPages from './loginPages'; 
 import ApplicationMain from './applicationMain'; 
+import Immersive from 'react-native-immersive';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,14 @@ const firebaseConfig = {
 const BridgeNavigator = () => {
     const [initialRoute, setInitialRoute] = useState('LoginPages'); // Default to LoginPages
     const [initializing, setInitializing] = useState(true);
+    useEffect(() => {
+        // Enable immersive mode
+        Immersive.on();
+        // Clean up to restore when the component unmounts
+        return () => {
+          Immersive.off();
+        };
+      }, []);
 
     useEffect(() => {
         // Initialize Firebase if not already initialized

@@ -14,7 +14,7 @@ const ServiceAdd = () => {
 
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const dates = Array.from({ length: 7 }, (_, i) =>
-    moment().add(i, 'days').format('YYYY-MM-DD')
+    moment().add(-i, 'days').format('YYYY-MM-DD')
   );
   const [customers, setCustomers] = useState([]);
   useEffect(() => {
@@ -68,7 +68,9 @@ const ServiceAdd = () => {
             {selectedDate === moment().format('YYYY-MM-DD')
             ? 'Today'
             : selectedDate === moment().add(1, 'days').format('YYYY-MM-DD')
-            ? 'Tomorrow'
+            ? 'Tomarrow'
+            : selectedDate === moment().add(-1, 'days').format('YYYY-MM-DD')
+            ? 'Yesterday'
             : moment(selectedDate).format('DD-MM-YYYY')}
           </Text>
           <TouchableOpacity>
