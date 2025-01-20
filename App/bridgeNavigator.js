@@ -22,34 +22,28 @@ const BridgeNavigator = () => {
     const [initialRoute, setInitialRoute] = useState('LoginPages'); // Default to LoginPages
     const [initializing, setInitializing] = useState(true);
     useEffect(() => {
-        // Enable immersive mode
         Immersive.on();
-        // Clean up to restore when the component unmounts
         return () => {
           Immersive.off();
         };
       }, []);
 
     useEffect(() => {
-        // Initialize Firebase if not already initialized
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
-        // Check authentication state
         const unsubscribe = auth().onAuthStateChanged((user) => {
             if (user) {
-                setInitialRoute('ApplicationMain'); // User is logged in
+                setInitialRoute('ApplicationMain'); 
             } else {
-                setInitialRoute('LoginPages'); // User is not logged in
+                setInitialRoute('LoginPages'); 
             }
-            setInitializing(false); // Authentication state checked
+            setInitializing(false);
         });
-        // Cleanup subscription
         return unsubscribe;
     }, []);
 
     if (initializing) {
-        // Optional loading indicator while checking authentication state
         return null;
     }
 
@@ -59,12 +53,12 @@ const BridgeNavigator = () => {
                 <Stack.Screen
                     name="LoginPages"
                     component={LoginPages}
-                    options={{ headerShown: false }} // Hide header for LoginPages
+                    options={{ headerShown: false }} 
                 />
                 <Stack.Screen
                     name="ApplicationMain"
                     component={ApplicationMain}
-                    options={{ headerShown: false }} // Hide header for ApplicationMain
+                    options={{ headerShown: false }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

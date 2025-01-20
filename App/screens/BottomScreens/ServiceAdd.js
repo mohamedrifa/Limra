@@ -136,7 +136,7 @@ const ServiceAdd = () => {
             data={customers}
             style={{ marginTop: 10 }}
             showsVerticalScrollIndicator={false}
-            ListFooterComponent={<View style={{height: 10}} />}
+            ListFooterComponent={<View style={{height: 77}} />}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.card}>

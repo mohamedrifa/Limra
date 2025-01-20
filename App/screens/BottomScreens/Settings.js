@@ -1,16 +1,16 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth'; // Ensure this package is installed and linked
+import auth from '@react-native-firebase/auth'; 
 import LoginPages from '../../loginPages';
+import RNRestart from 'react-native-restart';
 
-const ProfileScreen = ({ navigation }) => {
+const Settings = ({ navigation }) => {
   const handleLogout = () => {
     auth()
       .signOut()
       .then(() => {
         console.log('User signed out!');
-        // Redirect to Login screen
-        navigation.replace("LoginPages"); // Replace ensures user can't go back to the previous screen
+        RNRestart.Restart(); 
       })
       .catch(error => {
         console.error('Logout failed: ', error);
@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default Settings;
