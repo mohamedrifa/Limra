@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Bill = () => (
+const Earnings = () => (
   <View style={styles.container}>
-    <Text>Bill</Text>
+    <Text>Earnings</Text>
   </View>
 );
 
@@ -15,4 +15,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Bill;
+export default Earnings;

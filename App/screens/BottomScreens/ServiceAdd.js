@@ -1,5 +1,6 @@
 import React, { useState, useEffect} from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../../../firebase';
@@ -7,11 +8,9 @@ import { Linking } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 
-const ServiceAdd = () => {
-
+export default function ServiceAdd({ navigateToCustomerAdd }){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
-
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const dates = Array.from({ length: 7 }, (_, i) =>
     moment().add(-i, 'days').format('YYYY-MM-DD')
@@ -40,8 +39,12 @@ const ServiceAdd = () => {
     return () => unsubscribe(); 
   }, []);
 
+  const CustomerAdd = async () => {
+    navigateToFullScreen
+  };
+
   const openWhatsApp = (mobileNumber) => {
-    const number = mobileNumber || "8903677609"; // Fallback if mobileNumber is undefined
+    const number = mobileNumber || "9876543210";
     const whatsappUrl = `https://wa.me/${number}`;
     try {
       return Linking.openURL(whatsappUrl);
@@ -51,7 +54,7 @@ const ServiceAdd = () => {
     return Linking.openURL(whatsappUrl);
   };
   const openDialPad = async (mobileNumber) => {
-    const number = mobileNumber || "8903677609"; // Fallback if mobileNumber is undefined
+    const number = mobileNumber || "9876543210";
     const dialUrl = `tel:${number}`;
     try {
       return await Linking.openURL(dialUrl);
@@ -101,6 +104,7 @@ const ServiceAdd = () => {
               />
             </TouchableOpacity>
             }
+            
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dateItem}
@@ -126,11 +130,21 @@ const ServiceAdd = () => {
         </View>
         <View style={styles.serviceListContainer}>
           <View style={styles.addButtonContainer}>
-            <TouchableOpacity style={styles.addButton}>
-              <Image source={require('../../assets/vectors/plus.png')} style={styles.addIcon} />
-              <Text style={styles.addText}>Add Customer Profile</Text>
+            <TouchableOpacity style={styles.addButton} onPress={navigateToCustomerAdd}>
+              <LinearGradient
+                colors={['#22223B', '#5D5DA1']}
+                style={styles.addButton}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}>
+                <Image source={require('../../assets/vectors/plus.png')} style={styles.addIcon} />
+                <Text style={styles.addText}>Add Customer Profile</Text>
+              </LinearGradient>
             </TouchableOpacity>
-            <View style={styles.addButton}/>
+            <LinearGradient
+                colors={['#22223B', '#5D5DA1']}
+                style={styles.addButton}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}/>
           </View>
           <FlatList
             data={customers}
@@ -266,6 +280,7 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     fontSize: 14,
     marginLeft: 10,
+    color: '#FFFFFF',
   },
   listLine: {
     width: '100%',
@@ -328,5 +343,3 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 });
-
-export default ServiceAdd;

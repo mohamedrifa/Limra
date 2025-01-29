@@ -53,7 +53,7 @@ const Login = ({ navigation }) => {
           onChangeText={setPassword}
         />
 
-        <TouchableOpacity onPress={handleLogin}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <LinearGradient
             colors={['#22223B', '#5D5DA1']}
             style={styles.button}
@@ -119,6 +119,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     borderRadius: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4},
+    elevation: 4,
   },
   buttonText: {
     color: '#F2E9E4',
