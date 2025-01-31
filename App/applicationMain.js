@@ -7,10 +7,13 @@ import Earnings from './screens/BottomScreens/Earnings';
 import Messages from './screens/BottomScreens/Messages';
 import Settings from './screens/BottomScreens/Settings';
 import AddCustomer from './screens/AddCustomer';
+import moment from 'moment';
 
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
   const [addCustomerPage, setAddCustomerPage] = useState(false);
+  const [currentTime, setCurrentTime] = useState(moment().format('YYYY-MM-DD'));
+  const [customerId, setCustomerID] = useState("");
 
   useEffect(() => {
     const backAction = () => {
@@ -30,13 +33,13 @@ const ApplicationMain = () => {
 
   const renderPage = () => {
     if (addCustomerPage) {
-      return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} />;
+      return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} customerId={customerId}/>;
     }
     switch (activePage) {
       case 'Dashboard':
         return <Dashboard />;
       case 'ServiceAdd':
-        return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} />;
+        return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} sendCustomerId={setCustomerID}/>;
       case 'Messages':
         return <Messages />;
       case 'Earnings':

@@ -8,7 +8,7 @@ import { Linking } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 
-export default function ServiceAdd({ navigateToCustomerAdd }){
+export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
@@ -17,7 +17,7 @@ export default function ServiceAdd({ navigateToCustomerAdd }){
   );
   const [customers, setCustomers] = useState([]);
   useEffect(() => {
-    const customerRef = ref(database, 'customers');
+    const customerRef = ref(database, 'Customers');
     const unsubscribe = onValue(
       customerRef,
       (snapshot) => {
@@ -38,11 +38,14 @@ export default function ServiceAdd({ navigateToCustomerAdd }){
     );
     return () => unsubscribe(); 
   }, []);
-
-  const CustomerAdd = async () => {
-    navigateToFullScreen
+  const customerAdd = async () => {
+    sendCustomerId(moment().format('YYYYMMDDHHmmss'));
+    navigateToCustomerAdd();
   };
-
+  const editCustomer = async (customerId) => {
+    sendCustomerId(customerId);
+    navigateToCustomerAdd();
+  };
   const openWhatsApp = (mobileNumber) => {
     const number = mobileNumber || "9876543210";
     const whatsappUrl = `https://wa.me/${number}`;
@@ -130,7 +133,7 @@ export default function ServiceAdd({ navigateToCustomerAdd }){
         </View>
         <View style={styles.serviceListContainer}>
           <View style={styles.addButtonContainer}>
-            <TouchableOpacity style={styles.addButton} onPress={navigateToCustomerAdd}>
+            <TouchableOpacity style={styles.addButton} onPress={customerAdd}>
               <LinearGradient
                 colors={['#22223B', '#5D5DA1']}
                 style={styles.addButton}
@@ -166,7 +169,7 @@ export default function ServiceAdd({ navigateToCustomerAdd }){
                     </ScrollView>
                   </View>
                   <View style={styles.listIcons}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => editCustomer(item.id)}>
                       <Image source={require('../../assets/vectors/edit.png')} style={{width: 24, height: 24}} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>

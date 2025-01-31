@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBFF'
   },
   bgImage: {
-    resizeMode: 'cover',
-    width: '100%',
+    resizeMode: 'stretch',
+    width: '110%',
     height: 169,
   },
   titleImage: {

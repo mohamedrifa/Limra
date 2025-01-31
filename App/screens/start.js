@@ -1,7 +1,9 @@
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image, StatusBar} from 'react-native';
+import { Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image } from 'react-native';
 
+const { width } = Dimensions.get('window');
 const Start = ({ onNext }) => (
     <View style={styles.page}>
       <Image 
@@ -31,9 +33,9 @@ const styles = StyleSheet.create({
     justifyContent:'space-between',
   },
   downBg: {
-    width: 360,
-    height: 356,
-    resizeMode: 'center',
+    width: '100%',
+    height: width,
+    resizeMode: 'contain',
     alignItems: 'center',
     flexDirection: 'column-reverse'
   },
