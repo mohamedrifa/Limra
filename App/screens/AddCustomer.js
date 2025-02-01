@@ -6,7 +6,8 @@ import { getDatabase, ref, set } from "firebase/database";
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
 
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: '', city: '', serviceType: '', address: '' });
-  const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '', total: '', originalPrice: '', commission: '' }]);
+  const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
+  const [billTotals, setBillTotals] = useState([{ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'}]);
 
   useEffect(() => {
     const backAction = () => {
@@ -18,16 +19,21 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   }, [navigateToServiceAdd]);
 
   const handleAddRow = () => {
-    setBillItems([...billItems, { id: billItems.length + 1, particulars: '', rate: '', qty: '', total: '', originalPrice: '', commission: '' }]);
+    setBillItems([...billItems, { id: billItems.length + 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
   };
 
   const handleInputChange = (index, field, value) => {
     const updatedBillItems = [...billItems];
+    const updatedBillTotals = [...billTotals];
     updatedBillItems[index][field] = value;
     const rate = parseFloat(updatedBillItems[index]['rate']) || 0;
     const qty = parseFloat(updatedBillItems[index]['qty']) || 0;
     updatedBillItems[index]['total'] = (rate * qty).toFixed(2);
     updatedBillItems[index]['commission'] = (updatedBillItems[index]['total'] - updatedBillItems[index]['originalPrice']).toFixed(2);
+    updatedBillTotals[0].customTotal = billItems.reduce((sum, item) => sum + parseFloat(item.total || 0), 0).toFixed(2);
+    updatedBillTotals[0].ogTotal = billItems.reduce((sum, item) => sum + parseFloat(item.originalPrice || 0), 0).toFixed(2);
+    updatedBillTotals[0].commisionTotal = billItems.reduce((sum, item) => sum + parseFloat(item.commission || 0), 0).toFixed(2);
+    setBillTotals(updatedBillTotals);
     setBillItems(updatedBillItems);
   };
   
@@ -111,17 +117,17 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableSNo}><Text style={styles.headerText}>{item.id}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableParticulars}><TextInput style={styles.billInput} value={item.particulars} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
+                    <View style={styles.tableParticulars}><TextInput style={styles.inputText} value={item.particulars} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={styles.billInput} keyboardType="numeric" value={item.rate} onChangeText={(text) => handleInputChange(index, 'rate', text)} /></View>
+                    <View style={styles.tableRate}><TextInput style={[styles.inputText,{textAlign: 'center'}]} keyboardType="numeric" value={item.rate} onChangeText={(text) => handleInputChange(index, 'rate', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableQty}><TextInput style={styles.billInput} keyboardType="numeric" value={item.qty} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
+                    <View style={styles.tableQty}><TextInput style={[styles.inputText,{textAlign: 'center'}]} keyboardType="numeric" value={item.qty} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableTotal}><TextInput style={styles.billInput} value={item.total} onChangeText={(text) => handleInputChange(index, 'total', text)} /></View>
+                    <View style={styles.tableTotal}><TextInput style={[styles.inputText,{textAlign: 'right'}]} value={item.total} onChangeText={(text) => handleInputChange(index, 'total', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableOgPrice}><TextInput style={styles.billInput} value={item.originalPrice} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
+                    <View style={styles.tableOgPrice}><TextInput style={[styles.inputText,{textAlign: 'right'}]} keyboardType="numeric" value={item.originalPrice} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
-                    <View style={styles.tableCommision}><TextInput style={styles.billInput} value={item.commission} onChangeText={(text) => handleInputChange(index, 'commision', text)} /></View>
+                    <View style={styles.tableCommision}><TextInput style={[styles.inputText,{textAlign: 'right'}]} value={item.commission} onChangeText={(text) => handleInputChange(index, 'commision', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
                   </View>
                   <View style={{flexDirection: 'row'}}>
@@ -131,14 +137,34 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                 </View>
                 )}
               />
-              <TouchableOpacity style={styles.addButton} onPress={handleAddRow}>
-                <Text style={styles.addButtonText}>+ Add More Row</Text>
+              <TouchableOpacity style={styles.addRowButton} onPress={handleAddRow}>
+                <Text style={styles.addButtonText}>Add 1 more row</Text>
+                <Image style={styles.addButtonIcon} source={require('../assets/vectors/plus_black.png')}/>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitText}>Submit</Text>
-              </TouchableOpacity>
+              <View style={{flexDirection: 'row'}}>
+                <View style={styles.tableHorizontalLine1}/>
+                <View style={styles.tableHorizontalLine2}/>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <View style={styles.tableVerticalLine1}/>
+                <View style={styles.overallTotal}><Text style={styles.headerText}>Total</Text></View>
+                <View style={styles.tableVerticalLine1}/>
+                <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].customTotal}</Text></View>
+                <View style={styles.tableVerticalLine1}/>
+                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].ogTotal}</Text></View>
+                <View style={styles.tableVerticalLine2}/>
+                <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].commisionTotal}</Text></View>
+                <View style={styles.tableVerticalLine2}/>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <View style={styles.tableHorizontalLine1}/>
+                <View style={styles.tableHorizontalLine2}/>
+              </View>
             </View>
           </ScrollView>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitText}>Submit</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -240,6 +266,7 @@ const styles = StyleSheet.create({
 
 
 
+
   tableHorizontalLine1:{
     width: 466, 
     height: 1, 
@@ -307,6 +334,51 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     fontSize: 14,
     color: '#22223B'
+  },
+  inputText: {
+    fontFamily: 'Poppins',
+    fontWeight: 400,
+    height: 40,
+    textAlignVertical: 'center',
+    width: '100%',
+    color: '#22223B',
+  },
+  addRowButton: {
+    height: 20,
+    width: 466,
+    backgroundColor: '#C9ADA7',
+    borderStartColor: '#22223B',
+    borderEndColor: '#22223B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    borderEndWidth: 1,
+    borderStartWidth: 1,
+  },
+  addButtonText: {
+    fontFamily: 'Poppins',
+    fontSize: 14,
+    fontWeight: 400,
+    color: '#22223B',
+  },
+  addButtonIcon: {
+    width: 10,
+    height: 10,
+    marginLeft: 10,
+    resizeMode: 'contain',
+  },
+  overallTotal: {
+    height: 38,
+    width: 381,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+
+
+  submitButton: {
+    height: 40,
+    width: 80,
   }
 
 
