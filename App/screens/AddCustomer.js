@@ -4,6 +4,7 @@ import { getDatabase, ref, set, onValue } from "firebase/database";
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
+import BillGenerator from '../component/billGenerator';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
 
@@ -17,6 +18,9 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
+  const db = getDatabase();
+  const customerRef = ref(db, `/Customers/${customerId}`);
+
 
   useEffect(() => {
     const backAction = () => {
@@ -28,8 +32,6 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   }, [navigateToServiceAdd]);
   useEffect(() => {
     if (!customerId) return;
-    const db = getDatabase();
-    const customerRef = ref(db, `/Customers/${customerId}`);
     const unsubscribe = onValue(customerRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -83,7 +85,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
         </TouchableOpacity>
       </View>
       <ScrollView style = {styles.scrollView}>
-        <View style={{width: 328,marginTop: 15, alignSelf: 'center'}}>
+        <View style={{width: '100%',marginTop: 15, alignSelf: 'center', paddingLeft: 16, paddingRight: 16}}>
           <Text style={styles.promtText} >Name</Text>
           <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} />
           <View style={{flexDirection: 'row'}}>
@@ -143,14 +145,9 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
             <Text style={styles.promtText}>customer bill</Text>
             {isSaved&&(
-              <TouchableOpacity style={styles.downloadButton}>
-                <Text style={styles.downloadText}>Download</Text>
-              </TouchableOpacity>)}
-            {isSaved&&(
-              <TouchableOpacity style={styles.shareButton}>
-                <Text style={styles.shareText}>Share</Text>
-              </TouchableOpacity>
-            )}
+            <View style={{flex: 1, flexDirection: 'row', marginLeft: 10}}>
+              <BillGenerator customerId={customerId} customer={customer} billItems={billItems} billTotals={billTotals}/>
+            </View>)}
           </View>
           <ScrollView horizontal style={{marginTop: 18}}>
             <View style={{flexDirection: 'column'}}>
