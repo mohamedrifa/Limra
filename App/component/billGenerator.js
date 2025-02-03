@@ -70,6 +70,18 @@ export default function BillGenerator({ customerId, customer, billItems, billTot
 
 const bill = (customerId, customer, billItems, billTotals) => {
 
+  const tableRow = billItems
+  .map(
+    (item, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td style="text-align: left;">${item.particulars}</td>
+        <td>${item.rate}</td>
+        <td>${item.qty}</td>
+        <td style="text-align: right;">${item.total}</td>
+      </tr>`
+  )
+  .join('');
   try{
     return `
     <!DOCTYPE html>
@@ -219,11 +231,11 @@ const bill = (customerId, customer, billItems, billTotals) => {
                       <th>Total</th>
                   </tr>
               </thead>
-              <tbody id="billItems"></tbody>
+              <tbody>${tableRow}</tbody>
               <tfoot>
                   <tr>
                       <td colspan="4" class="table">Total</td>
-                      <td id="custom-total"></td>
+                      <td id="custom-total" style="text-align: right;">${billTotals[0].customTotal}</td>
                   </tr>
               </tfoot>
           </table>
@@ -234,29 +246,6 @@ const bill = (customerId, customer, billItems, billTotals) => {
           </div>
           <p class="servicesPassage">AC/Washing Machine/Refrigerator/Microwave/water Purifier & All Brand Services</p>
       </div>
-
-
-
-      <script type="module">
-        const customer = ${JSON.stringify(customer)};
-        const billItems = ${JSON.stringify(billItems)};
-        if (customer) {
-            billItemsContainer.innerHTML = "";
-            let grandTotal = 0;
-            billItems.forEach((item, index) => {
-              let row = \`<tr>
-                  <td>${index + 1}</td>
-                <td style="text-align: left;">${item.particulars}</td>
-                <td>${item.rate}</td>
-                <td>${item.qty}</td>
-                <td style="text-align: right;">${item.total}</td>
-              </tr>\`;
-              billItemsContainer.innerHTML += row;
-              grandTotal += Number(item.total);
-            });
-            document.getElementById("custom-total").innerText = grandTotal.toFixed(2);
-        }
-      </script>
   </body>
   </html>`;
   }catch(error){
