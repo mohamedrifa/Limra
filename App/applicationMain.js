@@ -12,7 +12,6 @@ import moment from 'moment';
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
   const [addCustomerPage, setAddCustomerPage] = useState(false);
-  const [currentTime, setCurrentTime] = useState(moment().format('YYYY-MM-DD'));
   const [customerId, setCustomerID] = useState("");
 
   useEffect(() => {

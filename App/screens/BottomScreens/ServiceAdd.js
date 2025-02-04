@@ -5,14 +5,14 @@ import moment from 'moment';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../../../firebase';
 import { Linking } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 
 export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-  const dates = Array.from({ length: 7 }, (_, i) =>
+  const dates = Array.from({ length: 30 }, (_, i) =>
     moment().add(-i, 'days').format('YYYY-MM-DD')
   );
   const [customers, setCustomers] = useState([]);
@@ -66,77 +66,93 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
     }
   };
 
+  const [searchActive, setSearchActive] = useState(false);
+
+  const searchHandler = async () => {
+    if(searchActive === false){
+      setSearchActive(true);
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
       <View style={styles.container}>
         <View style={styles.titleView}>
-          <Text style={styles.title}>
-            {selectedDate === moment().format('YYYY-MM-DD')
-            ? 'Today'
-            : selectedDate === moment().add(1, 'days').format('YYYY-MM-DD')
-            ? 'Tomarrow'
-            : selectedDate === moment().add(-1, 'days').format('YYYY-MM-DD')
-            ? 'Yesterday'
-            : moment(selectedDate).format('DD-MM-YYYY')}
-          </Text>
-          <TouchableOpacity>
-            <Image source={require('../../assets/vectors/search.png')} style={styles.search} />
+          { searchActive ? (
+              <View style={styles.searchView}>
+                <TouchableOpacity onPress={() => setSearchActive(false)}>
+                  <Image source={require('../../assets/vectors/arrowBack.png')} style={{width: 20, height: 20, resizeMode: 'contain'}} />
+                </TouchableOpacity>
+                <TextInput placeholder='     search profiles' style={styles.search}/>
+              </View>
+            ): (
+              <Text style={styles.title}>
+                {selectedDate === moment().format('YYYY-MM-DD')
+                ? 'Today'
+                : selectedDate === moment().add(1, 'days').format('YYYY-MM-DD')
+                ? 'Tomarrow'
+                : selectedDate === moment().add(-1, 'days').format('YYYY-MM-DD')
+                ? 'Yesterday'
+                : moment(selectedDate).format('DD-MM-YYYY')}
+              </Text> )}
+          <TouchableOpacity onPress={searchHandler} style={{position: 'absolute', right: 18, top: 7}}>
+            <Image source={require('../../assets/vectors/search.png')} style={{width: 30, height: 30}} />
           </TouchableOpacity>
         </View>
-        <View style={{ height: 55 }}>
-          <FlatList
-            data={dates}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.dateFlat}
-            keyExtractor={(item) => item}
-            ListFooterComponent={
-            <TouchableOpacity onPress={() => setOpen(true)} >
-              <Image source={require('../../assets/vectors/allDate.png')} style={styles.allDate} />
-              <DatePicker
-                modal
-                open={open}
-                date={date}
-                mode="date" // Can be 'date', 'time', or 'datetime'
-                onConfirm={(selectedDate) => {
-                  setOpen(false);
-                  setDate(selectedDate);
-                  setSelectedDate(moment(selectedDate).format('YYYY-MM-DD'));
-                }}
-                onCancel={() => setOpen(false)}
-              />
-            </TouchableOpacity>
-            }
-            
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.dateItem}
-                onPress={() => setSelectedDate(item)}
-              >
-                <Text
-                  style={[
-                    styles.dayText,
-                    moment(item).format('ddd')=== "Sun" && styles.sunday,
-                  ]}
-                >
-                  {moment(item).format('ddd').toUpperCase()}
-                </Text>
-                <Text
-                  style={styles.dateText}
-                >
-                  {moment(item).format('DD')}
-                </Text>
-                <View  style={[selectedDate === item && styles.selectedDateLine]}/>
+        {!searchActive ? (
+            <View style={{ height: 55, width:'100%', flexDirection: 'row-reverse', paddingLeft: 16, paddingRight: 16}}>
+              <TouchableOpacity onPress={() => setOpen(true)} >
+                <Image source={require('../../assets/vectors/allDate.png')} style={styles.allDate} />
+                <DatePicker
+                  modal
+                  open={open}
+                  date={date}
+                  mode="date" // Can be 'date', 'time', or 'datetime'
+                  onConfirm={(selectedDate) => {
+                    setOpen(false);
+                    setDate(selectedDate);
+                    setSelectedDate(moment(selectedDate).format('YYYY-MM-DD'));
+                  }}
+                  onCancel={() => setOpen(false)}
+                />
               </TouchableOpacity>
-            )}
-          />
-        </View>
+              <FlatList
+                data={dates}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.dateFlat}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.dateItem}
+                    onPress={() => setSelectedDate(item)}
+                  >
+                    <Text
+                      style={[
+                        styles.dayText,
+                        moment(item).format('ddd')=== "Sun" && styles.sunday,
+                      ]}
+                    >
+                      {moment(item).format('ddd').toUpperCase()}
+                    </Text>
+                    <Text
+                      style={styles.dateText}
+                    >
+                      {moment(item).format('DD')}
+                    </Text>
+                    <View  style={[selectedDate === item && styles.selectedDateLine]}/>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          ):null
+        }
         <View style={styles.serviceListContainer}>
           <View style={styles.addButtonContainer}>
-            <TouchableOpacity style={styles.addButton} onPress={customerAdd}>
+            <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={customerAdd}>
               <LinearGradient
                 colors={['#22223B', '#5D5DA1']}
-                style={styles.addButton}
+                style={[styles.addButton, {width: '100%'}]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}>
                 <Image source={require('../../assets/vectors/plus.png')} style={styles.addIcon} />
@@ -145,7 +161,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
             </TouchableOpacity>
             <LinearGradient
                 colors={['#22223B', '#5D5DA1']}
-                style={styles.addButton}
+                style={[styles.addButton, {width: '49%'}]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}/>
           </View>
@@ -155,34 +171,39 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
             showsVerticalScrollIndicator={false}
             ListFooterComponent={<View style={{height: 77}} />}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <View style={styles.listLine}/>
-                <View style={styles.listView}>
-                  <View style={styles.listDatas}>
-                    <ScrollView style={styles.listDatas} showsVerticalScrollIndicator={false}>
-                      <Text style={styles.name}>{item.name}</Text>
-                      <Text style={styles.city}>{item.city}</Text>
-                      <Text style={styles.address}>{item.address}</Text>
-                      <Text style={styles.machine}>{item.machine}</Text>
-                      <Text style={styles.mobile}>{item.mobile}</Text>
-                    </ScrollView>
+            renderItem={({ item }) => {
+              if(item.date === selectedDate || searchActive) {
+                return (
+                  <View style={styles.card}>
+                    <View style={styles.listLine}/>
+                    <View style={styles.listView}>
+                      <View style={styles.listDatas}>
+                        <ScrollView style={styles.listDatas} showsVerticalScrollIndicator={false}>
+                          <Text style={styles.name}>{item.name}</Text>
+                          <Text style={styles.city}>{item.city}</Text>
+                          <Text style={styles.address}>{item.address}</Text>
+                          <Text style={styles.machine}>{item.serviceType}</Text>
+                          <Text style={styles.mobile}>{item.mobile}</Text>
+                        </ScrollView>
+                      </View>
+                      <View style={styles.listIcons}>
+                        <TouchableOpacity onPress={() => editCustomer(item.id)}>
+                          <Image source={require('../../assets/vectors/edit.png')} style={{width: 24, height: 24}} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
+                          <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 24, height: 24}} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
+                          <Image source={require('../../assets/vectors/call.png')} style={{width: 24, height: 24}} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                    <View style={styles.listLine}/>
                   </View>
-                  <View style={styles.listIcons}>
-                    <TouchableOpacity onPress={() => editCustomer(item.id)}>
-                      <Image source={require('../../assets/vectors/edit.png')} style={{width: 24, height: 24}} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
-                      <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 24, height: 24}} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
-                      <Image source={require('../../assets/vectors/call.png')} style={{width: 24, height: 24}} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <View style={styles.listLine}/>
-              </View>
-            )}
+                );
+              }
+              return null;
+            }}
           />
         </View>
       </View>
@@ -199,8 +220,9 @@ const styles = StyleSheet.create({
   titleView: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    width: 325,
-    marginTop: 20,
+    width: '100%',
+    paddingHorizontal: 16,
+    marginTop: 25,
   },
   title: {
     fontSize: 24,
@@ -209,11 +231,21 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   search: {
-    width: 30,
-    height: 30,
+    width: '85%',
+    color: '#4A4E69',
+  },
+  searchView: {
+    width: '100%',
+    height: 43,
+    flexDirection: 'row',
+    borderColor: '#22223B',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 5,
   },
   dateFlat: {
-    width: 326,
+    width: '100%',
     height: 55,
     alignContent: 'center',
   },
@@ -255,13 +287,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   addButtonContainer: {
-    width: 328,
+    width: '100%',
+    paddingHorizontal: 16,
     alignSelf: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   addButton: {
-    width: 160,
     height: 67,
     borderRadius: 5,
     flexDirection: 'row',
@@ -296,8 +328,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   listView: {
+    width: '100%',
+    paddingHorizontal: 16,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   listDatas: {
@@ -341,7 +375,7 @@ const styles = StyleSheet.create({
   listIcons: {
     width: 92,
     height: 24,
-    marginLeft: 10,
+    marginRight: 19,
     justifyContent: 'space-between',
     flexDirection: 'row',
   },

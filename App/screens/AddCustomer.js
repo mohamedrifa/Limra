@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, FlatList, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, BackHandler, TouchableOpacity, Keyboard, TextInput, FlatList, ScrollView, Image } from 'react-native';
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
@@ -21,6 +21,22 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const db = getDatabase();
   const customerRef = ref(db, `/Customers/${customerId}`);
 
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const backAction = () => {
@@ -71,13 +87,40 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   
   const handleSubmit = () => {
     const db = getDatabase();
-    set(ref(db, `/Customers/${customerId}`), { ...customer, billItems, billTotals })
-      .then(() => [alert('Customer details saved!'),setIsSaved(true)])
+    if (!customer.name || customer.name.trim() === '') {
+      alert('Please Enter Name');
+      return;
+    };
+    if (!customer.mobile || customer.mobile.trim() === '') {
+      alert('Please Enter Monile No');
+      return;
+    }
+    if (!customer.city || customer.city.trim() === '') {
+      alert('Please Enter City');
+      return;
+    }
+    if (!customer.serviceType || customer.serviceType.trim() === 'Select Service') {
+      alert('choose a Service type');
+      return;
+    }  
+    if (!customer.address || customer.address.trim() === '') {
+      alert('Please Enter Address/Notes');
+      return;
+    }    
+    if(billItems[0].particulars.trim() === '' && billItems[0].rate.trim() === '' &&billItems[0].originalPrice.trim() === ''){
+      set(ref(db, `/Customers/${customerId}`), { ...customer})
+      .then(() => [alert('Customer details saved!'), Keyboard.dismiss()])
       .catch((error) => alert(`Error: ${error.message}`));
+    }
+    else {
+      set(ref(db, `/Customers/${customerId}`), { ...customer, billItems, billTotals })
+      .then(() => [alert('Customer details saved!'),setIsSaved(true), Keyboard.dismiss()])
+      .catch((error) => alert(`Error: ${error.message}`));
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { marginBottom: keyboardHeight }]}>
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.backButton} onPress={navigateToServiceAdd}>
           <View style={styles.backIcon}><Image source={require("../assets/vectors/arrowBack.png")} style={{ height:16,width:8}}/></View>
@@ -88,12 +131,12 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
         <View style={{width: '100%',marginTop: 15, alignSelf: 'center', paddingLeft: 16, paddingRight: 16}}>
           <Text style={styles.promtText} >Name</Text>
           <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} />
-          <View style={{flexDirection: 'row'}}>
-            <View style={{width: 154}}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={{width: '48%'}}>
               <Text style={styles.promtText} >Mobile No.</Text>
               <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => setCustomer({ ...customer, mobile: text })}/>
             </View>
-            <View style={{width: 154, marginLeft: 20}}>
+            <View style={{width: '48%'}}>
               <Text style={styles.promtText}>Date</Text>
               <View style={[styles.input, {paddingLeft: 16, paddingRight: 16 }]}>
                 <TouchableOpacity onPress={() => setOpen(true)} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -136,7 +179,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               <Picker.Item label="Other" value="Other" />
             </Picker>
             <TouchableOpacity style={styles.pickerCustomIcon}>
-              <Text style={{marginLeft: 10}}>{customer.serviceType}</Text>
+              <Text tyle={styles.input}>{customer.serviceType}</Text>
               <Image source={require('../assets/vectors/pickerDownArrow.png')} style={{width: 15, height: 15, resizeMode: 'cover'}}/>
             </TouchableOpacity>
           </View>
@@ -191,11 +234,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableQty}><TextInput style={[styles.inputText,{textAlign: 'center'}]} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableTotal}><TextInput style={[styles.inputText,{textAlign: 'right'}]} value={item.total|| ''} onChangeText={(text) => handleInputChange(index, 'total', text)} /></View>
+                    <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableOgPrice}><TextInput style={[styles.inputText,{textAlign: 'right'}]} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
-                    <View style={styles.tableCommision}><TextInput style={[styles.inputText,{textAlign: 'right'}]} value={item.commission|| ''} onChangeText={(text) => handleInputChange(index, 'commision', text)} /></View>
+                    <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
                     <View style={styles.tableVerticalLine2}/>
                   </View>
                   <View style={{flexDirection: 'row'}}>
@@ -352,10 +395,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEEFF', 
     pointerEvents: 'none', 
   },
-
-
-
-
   tableHorizontalLine1:{
     width: 466, 
     height: 1, 
@@ -462,9 +501,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-
-
   submitButton: {
     position: 'absolute',
     bottom: 22,
@@ -480,5 +516,4 @@ const styles = StyleSheet.create({
     width: 100,
     resizeMode: 'contain',
   },
-
 });
