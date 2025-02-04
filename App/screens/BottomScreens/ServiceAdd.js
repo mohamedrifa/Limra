@@ -67,13 +67,32 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   };
 
   const [searchActive, setSearchActive] = useState(false);
-
   const searchHandler = async () => {
     if(searchActive === false){
       setSearchActive(true);
     }
   };
-
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredCustomers = customers.filter(item =>
+    (item.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+    (item.city?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+    (item.address?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+    (item.mobile || "").includes(searchQuery)
+  );
+  const highlightText = (text, searchQuery) => {
+    if (!text || !searchQuery) return text;
+    const parts = text.split(new RegExp(`(${searchQuery})`, 'gi'));
+    if (searchActive){
+      return parts.map((part, index) =>
+        part.toLowerCase() === searchQuery.toLowerCase() ? (
+          <Text key={index} style={styles.highlight}>{part}</Text>
+        ) : (
+          part
+        )
+      );
+    }
+    return text;
+  };
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
       <View style={styles.container}>
@@ -83,7 +102,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 <TouchableOpacity onPress={() => setSearchActive(false)}>
                   <Image source={require('../../assets/vectors/arrowBack.png')} style={{width: 20, height: 20, resizeMode: 'contain'}} />
                 </TouchableOpacity>
-                <TextInput placeholder='     search profiles' style={styles.search}/>
+                <TextInput placeholder='     search profiles' style={styles.search} value={searchQuery} onChangeText={text => setSearchQuery(text)}/>
               </View>
             ): (
               <Text style={styles.title}>
@@ -166,7 +185,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 end={{ x: 1, y: 0 }}/>
           </View>
           <FlatList
-            data={customers}
+            data={searchActive ? filteredCustomers : customers}
             style={{ marginTop: 10 }}
             showsVerticalScrollIndicator={false}
             ListFooterComponent={<View style={{height: 77}} />}
@@ -179,11 +198,11 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                     <View style={styles.listView}>
                       <View style={styles.listDatas}>
                         <ScrollView style={styles.listDatas} showsVerticalScrollIndicator={false}>
-                          <Text style={styles.name}>{item.name}</Text>
-                          <Text style={styles.city}>{item.city}</Text>
-                          <Text style={styles.address}>{item.address}</Text>
-                          <Text style={styles.machine}>{item.serviceType}</Text>
-                          <Text style={styles.mobile}>{item.mobile}</Text>
+                          <Text style={styles.name}>{highlightText(item.name, searchQuery)}</Text>
+                          <Text style={styles.city}>{highlightText(item.city, searchQuery)}</Text>
+                          <Text style={styles.address}>{highlightText(item.address, searchQuery)}</Text>
+                          <Text style={styles.machine}>{highlightText(item.serviceType, searchQuery)}</Text>
+                          <Text style={styles.mobile}>{highlightText(item.mobile, searchQuery)}</Text>
                         </ScrollView>
                       </View>
                       <View style={styles.listIcons}>
@@ -210,7 +229,6 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#EBEEFF',
@@ -243,6 +261,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 5,
+  },
+  highlight: {
+    backgroundColor: '#F3FF00',
   },
   dateFlat: {
     width: '100%',

@@ -66,8 +66,15 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   
 
   const handleAddRow = () => {
-    setBillItems([...billItems, { id: billItems.length + 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
+    const lastItem = billItems[billItems.length - 1];
+    if (!lastItem.particulars.trim() && !lastItem.rate.trim() && !lastItem.originalPrice.trim()) {
+      alert('Fill any Column in Previous');
+      return;
+    }
+    setBillItems([...billItems, { id: billItems.length + 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }
+    ]);
   };
+  
 
   const handleInputChange = (index, field, value) => {
     const updatedBillItems = [...billItems];
@@ -87,6 +94,10 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   
   const handleSubmit = () => {
     const db = getDatabase();
+    if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
+      alert('Please Enter All the Credentials');
+      return;
+    };
     if (!customer.name || customer.name.trim() === '') {
       alert('Please Enter Name');
       return;
@@ -107,6 +118,10 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
       alert('Please Enter Address/Notes');
       return;
     }    
+    const lastItem = billItems[billItems.length - 1];
+    if (!lastItem.particulars.trim() && !lastItem.rate.trim() && !lastItem.originalPrice.trim()) {
+      setBillItems(billItems.slice(0, -1));
+    }
     if(billItems[0].particulars.trim() === '' && billItems[0].rate.trim() === '' &&billItems[0].originalPrice.trim() === ''){
       set(ref(db, `/Customers/${customerId}`), { ...customer})
       .then(() => [alert('Customer details saved!'), Keyboard.dismiss()])
@@ -158,7 +173,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               </View>
             </View>
           </View>
-          <Text style={styles.promtText}>city</Text>
+          <Text style={styles.promtText}>City</Text>
           <TextInput style={styles.input} value={customer.city|| ''} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
           <Text style={styles.promtText}>Service Type</Text>
           <View style={styles.input}>
