@@ -7,11 +7,10 @@ import moment from 'moment';
 import BillGenerator from '../component/billGenerator';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
-
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select Service', address: '' });
   const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
-  const [billTotals, setBillTotals] = useState([{ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'}]);
-
+  const [billTotals, setBillTotals] = useState({ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'});
+  
   const [isSaved, setIsSaved] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -19,7 +18,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
   const db = getDatabase();
-  const customerRef = ref(db, `/Customers/${customerId}`);
+  const customerRef = ref(db, `/ServiceList/${customerId}`);
 
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -74,24 +73,21 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     setBillItems([...billItems, { id: billItems.length + 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }
     ]);
   };
-  
-
   const handleInputChange = (index, field, value) => {
     const updatedBillItems = [...billItems];
-    const updatedBillTotals = [...billTotals];
+    const updatedBillTotals = billTotals;
     updatedBillItems[index][field] = value;
     const rate = parseFloat(updatedBillItems[index]['rate']) || 0;
     let qty = parseFloat(updatedBillItems[index]['qty']) || 0;
     if (isNaN(qty) || qty <= 0) { qty = 1; }
     updatedBillItems[index]['total'] = (rate * qty).toFixed(2);
     updatedBillItems[index]['commission'] = (updatedBillItems[index]['total'] - updatedBillItems[index]['originalPrice']).toFixed(2);
-    updatedBillTotals[0].customTotal = billItems.reduce((sum, item) => sum + parseFloat(item.total || 0), 0).toFixed(2);
-    updatedBillTotals[0].ogTotal = billItems.reduce((sum, item) => sum + parseFloat(item.originalPrice || 0), 0).toFixed(2);
-    updatedBillTotals[0].commisionTotal = billItems.reduce((sum, item) => sum + parseFloat(item.commission || 0), 0).toFixed(2);
+    updatedBillTotals.customTotal = billItems.reduce((sum, item) => sum + parseFloat(item.total || 0), 0).toFixed(2);
+    updatedBillTotals.ogTotal = billItems.reduce((sum, item) => sum + parseFloat(item.originalPrice || 0), 0).toFixed(2);
+    updatedBillTotals.commisionTotal = billItems.reduce((sum, item) => sum + parseFloat(item.commission || 0), 0).toFixed(2);
     setBillTotals(updatedBillTotals);
     setBillItems(updatedBillItems);
   };
-  
   const handleSubmit = () => {
     const db = getDatabase();
     if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
@@ -123,12 +119,12 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
       setBillItems(billItems.slice(0, -1));
     }
     if(billItems[0].particulars.trim() === '' && billItems[0].rate.trim() === '' &&billItems[0].originalPrice.trim() === ''){
-      set(ref(db, `/Customers/${customerId}`), { ...customer})
+      set(ref(db, `/ServiceList/${customerId}`), { ...customer})
       .then(() => [alert('Customer details saved!'), Keyboard.dismiss()])
       .catch((error) => alert(`Error: ${error.message}`));
     }
     else {
-      set(ref(db, `/Customers/${customerId}`), { ...customer, billItems, billTotals })
+      set(ref(db, `/ServiceList/${customerId}`), { ...customer, billItems, billTotals })
       .then(() => [alert('Customer details saved!'),setIsSaved(true), Keyboard.dismiss()])
       .catch((error) => alert(`Error: ${error.message}`));
     }
@@ -142,7 +138,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView style = {styles.scrollView}>
+      <ScrollView style = {styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={{width: '100%',marginTop: 15, alignSelf: 'center', paddingLeft: 16, paddingRight: 16}}>
           <Text style={styles.promtText} >Name</Text>
           <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} />
@@ -207,7 +203,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               <BillGenerator customerId={customerId} customer={customer} billItems={billItems} billTotals={billTotals}/>
             </View>)}
           </View>
-          <ScrollView horizontal style={{marginTop: 18}}>
+          <ScrollView horizontal style={{marginTop: 18}} showsHorizontalScrollIndicator={false}>
             <View style={{flexDirection: 'column'}}>
               <View style={{flexDirection: 'row'}}>
                 <View style={styles.tableHorizontalLine1}/>
@@ -275,11 +271,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                 <View style={styles.tableVerticalLine1}/>
                 <View style={styles.overallTotal}><Text style={styles.headerText}>Total</Text></View>
                 <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].customTotal}</Text></View>
+                <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.customTotal}</Text></View>
                 <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].ogTotal}</Text></View>
+                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.ogTotal}</Text></View>
                 <View style={styles.tableVerticalLine2}/>
-                <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals[0].commisionTotal}</Text></View>
+                <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.commisionTotal}</Text></View>
                 <View style={styles.tableVerticalLine2}/>
               </View>
               <View style={{flexDirection: 'row'}}>

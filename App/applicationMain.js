@@ -7,7 +7,6 @@ import Earnings from './screens/BottomScreens/Earnings';
 import Messages from './screens/BottomScreens/Messages';
 import Settings from './screens/BottomScreens/Settings';
 import AddCustomer from './screens/AddCustomer';
-import moment from 'moment';
 
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');

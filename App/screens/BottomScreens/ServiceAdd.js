@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
-import { ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, set } from 'firebase/database';
 import { database } from '../../../firebase';
 import { Linking } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
@@ -17,7 +17,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   );
   const [customers, setCustomers] = useState([]);
   useEffect(() => {
-    const customerRef = ref(database, 'Customers');
+    const customerRef = ref(database, 'ServiceList');
     const unsubscribe = onValue(
       customerRef,
       (snapshot) => {
@@ -93,6 +93,24 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
     }
     return text;
   };
+
+  const addToTask = async (customerId) => {
+    const db = getDatabase();
+    const customerRef = ref(db, `/ServiceList/${customerId}`);
+    onValue(customerRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const { billItems, billTotals, ...filteredData } = data;
+        filteredData.date = moment().format('YYYY-MM-DD');
+        set(ref(db, `/Tasks/${customerId}`), filteredData)
+          .then(() => Alert.alert('Success', 'Task Added '))
+          .catch((error) => Alert.alert('Error', error.message));
+      }
+    }, { onlyOnce: true });
+  };
+  
+  
+
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
       <View style={styles.container}>
@@ -167,7 +185,8 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
           ):null
         }
         <View style={styles.serviceListContainer}>
-          <View style={styles.addButtonContainer}>
+          {!searchActive ? (
+            <View style={styles.addButtonContainer}>
             <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={customerAdd}>
               <LinearGradient
                 colors={['#22223B', '#5D5DA1']}
@@ -184,6 +203,8 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}/>
           </View>
+          ): null
+          }
           <FlatList
             data={searchActive ? filteredCustomers : customers}
             style={{ marginTop: 10 }}
@@ -218,6 +239,9 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                       </View>
                     </View>
                     <View style={styles.listLine}/>
+                    <TouchableOpacity style={styles.addToTask}  onPress={() => addToTask(item.id)}>
+                      <Text style={styles.addToTaskText}>Add To Task</Text>
+                    </TouchableOpacity>
                   </View>
                 );
               }
@@ -400,4 +424,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
   },
+  addToTask: {
+    width: 92,
+    height: 30,
+    position: 'absolute',
+    borderRadius: 30,
+    borderWidth: 1,
+    right: 19,
+    bottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: '#22223B'
+
+  },
+  addToTaskText: {
+    fontFamily: 'Poppins',
+    fontWeight: 400,
+    fontSize: 12,
+    color: '#22223B',
+  }
 });

@@ -249,7 +249,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               <tfoot>
                   <tr>
                       <td colspan="4" class="table">Total</td>
-                      <td id="custom-total" style="text-align: right;">${billTotals[0].customTotal}</td>
+                      <td id="custom-total" style="text-align: right;">${billTotals.customTotal}</td>
                   </tr>
               </tfoot>
           </table>
