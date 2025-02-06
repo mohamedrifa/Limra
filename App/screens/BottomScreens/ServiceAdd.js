@@ -101,6 +101,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
       const data = snapshot.val();
       if (data) {
         const { billItems, billTotals, ...filteredData } = data;
+        filteredData.isAddedToProfile = true;
         filteredData.date = moment().format('YYYY-MM-DD');
         set(ref(db, `/Tasks/${customerId}`), filteredData)
           .then(() => Alert.alert('Success', 'Task Added '))

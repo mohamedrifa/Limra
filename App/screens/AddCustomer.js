@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, BackHandler, TouchableOpacity, Keyboard, TextInput, FlatList, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, BackHandler, Alert, TouchableOpacity, Keyboard, TextInput, FlatList, ScrollView, Image } from 'react-native';
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
@@ -99,7 +99,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
       return;
     };
     if (!customer.mobile || customer.mobile.trim() === '') {
-      alert('Please Enter Monile No');
+      alert('Please Enter Mobile No');
       return;
     }
     if (!customer.city || customer.city.trim() === '') {
@@ -120,12 +120,12 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     }
     if(billItems[0].particulars.trim() === '' && billItems[0].rate.trim() === '' &&billItems[0].originalPrice.trim() === ''){
       set(ref(db, `/ServiceList/${customerId}`), { ...customer})
-      .then(() => [alert('Customer details saved!'), Keyboard.dismiss()])
+      .then(() => [alert('Success: Customer details saved!'), Keyboard.dismiss()])
       .catch((error) => alert(`Error: ${error.message}`));
     }
     else {
       set(ref(db, `/ServiceList/${customerId}`), { ...customer, billItems, billTotals })
-      .then(() => [alert('Customer details saved!'),setIsSaved(true), Keyboard.dismiss()])
+      .then(() => [Alert.alert('Success','Customer details saved!'),setIsSaved(true), Keyboard.dismiss()])
       .catch((error) => alert(`Error: ${error.message}`));
     }
   };
@@ -179,7 +179,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               style={styles.picker}
               dropdownIconColor={'#EBEEFF'}
             >
-              <Picker.Item label="A.C" value="A.C" />
+              <Picker.Item label="A.C" value="AC" />
               <Picker.Item label="Washing Machine" value="Washing Machine" />
               <Picker.Item label="Refrigerator" value="Refrigerator" />
               <Picker.Item label="Microwave Oven" value="Microwave Oven" />
@@ -190,7 +190,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               <Picker.Item label="Other" value="Other" />
             </Picker>
             <TouchableOpacity style={styles.pickerCustomIcon}>
-              <Text tyle={styles.input}>{customer.serviceType}</Text>
+              <Text style={{color: '#4A4E69'}}>{customer.serviceType}</Text>
               <Image source={require('../assets/vectors/pickerDownArrow.png')} style={{width: 15, height: 15, resizeMode: 'cover'}}/>
             </TouchableOpacity>
           </View>

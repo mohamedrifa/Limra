@@ -12,22 +12,29 @@ const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
   const [addCustomerPage, setAddCustomerPage] = useState(false);
   const [customerId, setCustomerID] = useState("");
+  const [toEdit, setToEdit] = useState(false);
+  const [toAdd, setToAdd] = useState(false);
+  
 
   useEffect(() => {
     const backAction = () => {
-      if (addCustomerPage) {
-        setAddCustomerPage(false); // Go back to ServiceAdd from AddCustomer
-        return true; 
-      } else if (activePage !== 'ServiceAdd') {
-        setActivePage('ServiceAdd'); // Navigate to ServiceAdd if not there
+      if (toAdd || toEdit) {
+        setToAdd(false);
+        setToEdit(false);
+        return true;
+      } else if (addCustomerPage) {
+        setAddCustomerPage(false);
+        return true;
+      } else if (activePage !== 'Dashboard') {
+        setActivePage('Dashboard');
         return true;
       }
-      return false; // Allow default behavior (exit app)
+      return false;
     };
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [activePage, addCustomerPage]);
+  }, [activePage, addCustomerPage, toAdd, toEdit]);
 
   const renderPage = () => {
     if (addCustomerPage) {
@@ -35,7 +42,7 @@ const ApplicationMain = () => {
     }
     switch (activePage) {
       case 'Dashboard':
-        return <Dashboard />;
+        return <Dashboard toAdd={toAdd} toEdit={toEdit} sendToAdd={setToAdd} sendToEdit={setToEdit}/>;
       case 'ServiceAdd':
         return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} sendCustomerId={setCustomerID}/>;
       case 'Messages':
