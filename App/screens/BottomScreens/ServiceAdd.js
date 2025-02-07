@@ -103,7 +103,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
         const { billItems, billTotals, ...filteredData } = data;
         filteredData.isAddedToProfile = true;
         filteredData.date = moment().format('YYYY-MM-DD');
-        set(ref(db, `/Tasks/${customerId}`), filteredData)
+        set(ref(db, `/Tasks/${moment().format('YYYYMMDDHHmmss')}`), filteredData)
           .then(() => Alert.alert('Success', 'Task Added '))
           .catch((error) => Alert.alert('Error', error.message));
       }

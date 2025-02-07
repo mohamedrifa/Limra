@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect}from 'react';
-import { View, Text, StyleSheet, Image, Alert, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler} from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler} from 'react-native';
 import {  ref, onValue, set, update} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
@@ -131,12 +131,83 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         .then(() => console.log("Status updated successfully"))
         .catch((error) => console.error("Error updating status:", error));
     };
-
     const deleteTask = async (taskId) => {
       set(ref(database, `Tasks/${taskId}`), null)
           .then(() => console.log('Success'))
           .catch(error => console.log(error));
     };
+    const [animations, setAnimations] = useState([]);
+    useEffect(() => {
+      const newAnimations = tasks.map(() => new Animated.Value(0));
+      setAnimations(newAnimations);
+      console.log("Animations initialized:", newAnimations); // Debugging
+    }, [tasks]);
+    const [tempIndex, setTempIndex] = useState();
+    const moveItem = () => {
+      if (!animations[tempIndex]) return;
+      setToClose(false);
+      Animated.timing(animations[tempIndex], {
+        toValue: 500, 
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {      
+        const updatedTasks = tasks.filter(task => task.id !== tempTaskId);
+        setTasks(updatedTasks);
+        deleteTask(tempTaskId);
+        setTempIndex(null);
+        setTempTaskId(null);
+      });
+    };
+    const renderItem = ({ item, index}) => (
+      <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
+            <Image source={serviceTypeImage(item.serviceType)} style={styles.serviceTypeImage}/>
+            <View style={styles.listView}>
+              <ScrollView style={{height: '100%'}} showsVerticalScrollIndicator={false}>
+                <Text style={styles.date}>{moment(item.date).format('DD-ddd').toUpperCase()}</Text>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.mobile}>{item.mobile}</Text>
+                <Text style={styles.serviceType}>{item.serviceType}</Text>
+                <Text style={styles.city}>{item.city}</Text>
+                <Text style={styles.address}>{item.address}</Text>
+                <View style={{height:61}}/>
+              </ScrollView>
+              <TouchableOpacity style={styles.taskEdit} onPress={() => handleEditTask(item.id)}>
+                <Image source={require('../../assets/vectors/taskEdit.png')} style={{height: 35, width: 35, resizeMode: 'contain'}}/>
+              </TouchableOpacity>
+            </View>
+            <LinearGradient
+              colors={['#F8FAFFCF', '#F9FBFF']}
+              style={styles.cardButtonView}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}>
+              <TouchableOpacity style={styles.closeButton} onPress={() => delConfirmation(index, item.id)}>
+                <Text style={styles.buttonText1}>Close</Text>
+              </TouchableOpacity>
+              { !item.isAddedToProfile ? (
+                <TouchableOpacity style={styles.addToTaskButton} onPress={() => addToProfile(item.id)}>
+                  <Text style={styles.buttonText1}>Add to profile</Text>
+                </TouchableOpacity>
+                ) : (
+                <LinearGradient
+                  colors={['#5D5DA1', '#22223B']}
+                  style={[styles.addToTaskButton,{flexDirection: 'row'}]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}>
+                    <Image source={require('../../assets/vectors/tickWhite.png')} style={{width: 20, height: 20, resizeMode: 'contain', alignSelf: 'center'}}/>
+                    <Text style={styles.buttonText2}>Added</Text>
+                </LinearGradient>
+                )
+                }
+              </LinearGradient>
+            </Animated.View>
+    );
+    const [toClose, setToClose] = useState(false);
+    const delConfirmation = (index, taskId) => {
+      setToClose(true);
+      setTempIndex(index);
+      setTempTaskId(taskId);
+    };
+
 
     return(
   <View style={styles.container}>
@@ -164,52 +235,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         ListHeaderComponent={<View style={{width:17}} />}
         ListFooterComponent={<View style={{width:7}} />}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          return (
-            <View style={styles.cardView}>
-              <Image source={serviceTypeImage(item.serviceType)} style={styles.serviceTypeImage}/>
-              <View style={styles.listView}>
-                <ScrollView style={{height: '100%'}} showsVerticalScrollIndicator={false}>
-                  <Text style={styles.date}>{moment(item.date).format('DD-ddd').toUpperCase()}</Text>
-                  <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.mobile}>{item.mobile}</Text>
-                  <Text style={styles.serviceType}>{item.serviceType}</Text>
-                  <Text style={styles.city}>{item.city}</Text>
-                  <Text style={styles.address}>{item.address}</Text>
-                  <View style={{height:61}}/>
-                </ScrollView>
-                <TouchableOpacity style={styles.taskEdit} onPress={() => handleEditTask(item.id)}>
-                  <Image source={require('../../assets/vectors/taskEdit.png')} style={{height: 35, width: 35, resizeMode: 'contain'}}/>
-                </TouchableOpacity>
-              </View>
-              <LinearGradient
-                colors={['#F8FAFFCF', '#F9FBFF']}
-                style={styles.cardButtonView}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}>
-                <TouchableOpacity style={styles.closeButton} onPress={() => deleteTask(item.id)}>
-                  <Text style={styles.buttonText1}>Close</Text>
-                </TouchableOpacity>
-                { !item.isAddedToProfile ? (
-                  <TouchableOpacity style={styles.addToTaskButton} onPress={() => addToProfile(item.id)}>
-                  <Text style={styles.buttonText1}>Add to profile</Text>
-                </TouchableOpacity>
-                ) : (
-                  <LinearGradient
-                  colors={['#5D5DA1', '#22223B']}
-                  style={[styles.addToTaskButton,{flexDirection: 'row'}]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}>
-                    <Image source={require('../../assets/vectors/tickWhite.png')} style={{width: 20, height: 20, resizeMode: 'contain', alignSelf: 'center'}}/>
-                    <Text style={styles.buttonText2}>Added</Text>
-                  </LinearGradient>
-                )
-                }
-              </LinearGradient>
-            </View>
-          );
-        }} 
-      />
+        renderItem={renderItem} />
     </View>
       <View style={{width: '100%', height: '43', marginTop: 14.5,marginBottom: 85, paddingHorizontal: 17,flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
         <Text style={styles.addTaskText}>Add new tasks to your dashboard</Text>
@@ -283,6 +309,34 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
           </View>
         )
       }
+      {
+        toClose && (
+        <View style={styles.blurView} >
+          <View style={styles.closeTaskContainer}>
+            <LinearGradient
+              colors={['#342F33', '#9A8C98']}
+              style={{width: '100%', borderTopRightRadius: 5, borderTopLeftRadius: 5, height: 43, alignItems: 'center', justifyContent: 'center'}}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}>
+              <Text style={styles.addTaskButtonText}>Are you sure?</Text>
+            </LinearGradient>
+            <View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between',alignItems: 'center', paddingHorizontal: 10,}}>
+              <TouchableOpacity style={[styles.delConfirmButton, {borderWidth: 1}]} onPress={()=>setToClose(false)}>
+                <Text style={[styles.delConfirmText, {color: '#22223B'}]}>No</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.delConfirmButton} onPress={()=> {moveItem()}}>
+                <LinearGradient
+                  colors={['#22223B', '#5D5DA1']}
+                  style={styles.delConfirmButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}>
+                  <Text style={[styles.delConfirmText, {color: '#FFFFFF'}]}>Yes</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>) 
+      }
     </View>
   )};
 
@@ -339,9 +393,6 @@ const styles = StyleSheet.create({
     height: 25,
     resizeMode: 'contain',
   },
-
-
-
   cardView: {
     width: 249,
     height: '100%',
@@ -463,11 +514,6 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-
-
-
-
-
   addTaskText: {
     width: 166,
     height: 48,
@@ -558,5 +604,28 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     width: '100%',
     textAlign: 'center',
+  },
+  closeTaskContainer: {
+    width: 231,
+    height: 103,
+    backgroundColor: '#EBEEFF',
+    position: 'absolute',
+    bottom: 200,
+    borderRadius: 5,
+  },
+  delConfirmButton: {
+    width: 70,
+    height: 35,
+    backgroundColor: '#EBEEFF',
+    borderRadius: 30,
+    borderColor: '#22223B',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  delConfirmText: {
+    fontFamily: 'Questrial',
+    fontWeight: 400,
+    color: '#22223B',
+    fontSize: 16,
   },
 });
