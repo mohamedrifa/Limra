@@ -12,33 +12,29 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select Service', address: '' });
   const [tasks, setTasks] = useState([]);
   const [tempTaskId, setTempTaskId] = useState(null); 
-    useEffect(() => {
-      const customerRef = ref(database, 'Tasks');
-      if(!toEdit || !toAdd){
-        setTempTaskId(null);
-      }
-      const unsubscribe = onValue(
-        customerRef,
-        (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            const customerList = Object.keys(data).map((key) => ({
-              id: key, 
-              ...data[key], 
-            }));
-            setTasks(customerList); 
-          } else {
-            setTasks([]);
-          }
-        },
-        {
-          onlyOnce: false,
-        }
-      );
-      return () => unsubscribe(); 
-    }, []);
+  const [overallTasks, setOverallTasks] = useState();
+  const [completedTasks, setCompletedTasks] = useState();
 
-    const [isSaved, setIsSaved] = useState(false);
+  useEffect(() => {
+    const customerRef = ref(database, "Tasks");
+    onValue(customerRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const { overallTasks, completedTasks, ...taskEntries } = data;
+        const customerList = Object.keys(taskEntries).map((key) => ({
+          id: key,
+          ...taskEntries[key],
+        }));
+        setTasks(customerList);
+        setOverallTasks(overallTasks || 0);
+        setCompletedTasks(completedTasks || 0);
+      } else {
+        setTasks([]);
+        setOverallTasks(0);
+        setCompletedTasks(completedTasks || 0);
+      }
+    });
+  }, []);
     const [date, setDate] = useState(new Date());
     const [open, setOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
@@ -97,20 +93,21 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         return;
       }    
       set(ref(database, `Tasks/${tempTaskId}`), customer)
-          .then(() => {
-            if(toAdd){
-              Alert.alert('Success','Task Added');
-              sendToAdd(false);
-            }
-            else{
-              Alert.alert('Success','Task Edited');
-              sendToEdit(false);
-            }   
-          })
-          .catch(error => {
-            console.log(error);
-            Alert.alert('Error',`error code: ${error}`);
-          });
+        .then(() => {
+          if (toAdd) {
+            update(ref(database, 'Tasks'), { overallTasks: overallTasks + 1 })
+              .then(() => { 
+                Alert.alert('Success', 'Task Added');
+                sendToAdd(false);})
+              .catch(error => console.log(error));
+          } else {
+            Alert.alert('Success', 'Task Edited');
+            sendToEdit(false);
+          } })
+        .catch(error => {
+          console.log(error);
+          Alert.alert('Error', `error code: ${error}`);
+      });
       setTempTaskId(null);
     };
     const addToProfile = (taskId) => {
@@ -133,7 +130,10 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     };
     const deleteTask = async (taskId) => {
       set(ref(database, `Tasks/${taskId}`), null)
-          .then(() => console.log('Success'))
+          .then(() => {
+            update(ref(database, 'Tasks'), { completedTasks: completedTasks + 1 })
+              .then(() => console.log('Success'))
+              .catch(error => console.log(error));})
           .catch(error => console.log(error));
     };
     const [animations, setAnimations] = useState([]);
@@ -158,7 +158,9 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         setTempTaskId(null);
       });
     };
-    const renderItem = ({ item, index}) => (
+    const renderItem = ({ item, index}) => {
+      if(item.id !== "overallTasks" && item.id !== "completedTasks"){
+        return(
       <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
             <Image source={serviceTypeImage(item.serviceType)} style={styles.serviceTypeImage}/>
             <View style={styles.listView}>
@@ -199,8 +201,10 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
                 )
                 }
               </LinearGradient>
-            </Animated.View>
-    );
+            </Animated.View>)}
+        else
+                return null;
+    };
     const [toClose, setToClose] = useState(false);
     const delConfirmation = (index, taskId) => {
       setToClose(true);
@@ -208,18 +212,17 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       setTempTaskId(taskId);
     };
 
-
     return(
   <View style={styles.container}>
     <Text style = {styles.text}>Dashboard</Text>
     <View style={styles.serviceCalculator}>
       <View style={{alignItems: 'center'}}>
         <Text style={styles.calculatorHead}>overall</Text>
-        <Text style={styles.calculatorData}>100</Text>
+        <Text style={styles.calculatorData}>{overallTasks}</Text>
       </View>
       <View style={{alignItems: 'center'}}>
         <Text style={styles.calculatorHead}>completed</Text>
-        <Text style={styles.calculatorData}>100</Text>
+        <Text style={styles.calculatorData}>{completedTasks}</Text>
       </View>
     </View>
     <View style={styles.plainContainer}>

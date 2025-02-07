@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
-import { getDatabase, ref, onValue, set } from 'firebase/database';
+import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
 import { database } from '../../../firebase';
 import { Linking } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
@@ -97,21 +97,25 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   const addToTask = async (customerId) => {
     const db = getDatabase();
     const customerRef = ref(db, `/ServiceList/${customerId}`);
-    onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const { billItems, billTotals, ...filteredData } = data;
-        filteredData.isAddedToProfile = true;
-        filteredData.date = moment().format('YYYY-MM-DD');
-        set(ref(db, `/Tasks/${moment().format('YYYYMMDDHHmmss')}`), filteredData)
-          .then(() => Alert.alert('Success', 'Task Added '))
-          .catch((error) => Alert.alert('Error', error.message));
-      }
-    }, { onlyOnce: true });
+    
+    try {
+      const snapshot = await get(customerRef); // Fetch customer data once
+      if (!snapshot.exists()) return;
+      const taskRef = ref(db, "Tasks/overallTasks");
+      const overallSnapshot = await get(taskRef); // Fetch overallTasks count once
+      const overallTasks = overallSnapshot.exists() ? overallSnapshot.val() : 0;
+      const { billItems, billTotals, ...filteredData } = snapshot.val();
+      filteredData.isAddedToProfile = true;
+      filteredData.date = moment().format('YYYY-MM-DD');
+      await set(ref(db, `/Tasks/${moment().format('YYYYMMDDHHmmss')}`), filteredData);
+      await update(ref(db, "Tasks"), { overallTasks: overallTasks + 1 });
+      Alert.alert("Success", "Task Added");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+      console.log(error);
+    }
   };
   
-  
-
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
       <View style={styles.container}>
@@ -121,7 +125,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 <TouchableOpacity onPress={() => setSearchActive(false)}>
                   <Image source={require('../../assets/vectors/arrowBack.png')} style={{width: 20, height: 20, resizeMode: 'contain'}} />
                 </TouchableOpacity>
-                <TextInput placeholder='     search profiles' style={styles.search} value={searchQuery} onChangeText={text => setSearchQuery(text)}/>
+                <TextInput placeholder='     search profiles' style={styles.search} value={searchQuery} onChangeText={text => setSearchQuery(text)} placeholderTextColor={'#4A4E69'}/>
               </View>
             ): (
               <Text style={styles.title}>
