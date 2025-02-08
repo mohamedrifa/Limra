@@ -51,6 +51,16 @@ const Messages = () => {
       return text;
     };
 
+  const [selectedNumbers, setSelectedNumbers] = useState([]);
+  const addToList = (mobile) => {
+    if (!selectedNumbers.includes(mobile)) {
+      setSelectedNumbers([...selectedNumbers, mobile]);
+    }
+    else{
+      setSelectedNumbers(selectedNumbers.filter(item => item !== mobile));
+    }
+  };
+
 
   return(
   <View style={styles.container}>
@@ -74,35 +84,49 @@ const Messages = () => {
       style={{ marginTop: 5 }}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={<View style={{width: '100%', height: 0.25, backgroundColor: '#22223B'}}/>}
-      ListFooterComponent={<View style={{height: 129}} />}
+      ListFooterComponent={selectedNumbers.length>0 ? (<View style={{height: 129}} />):(<View style={{height: 77}} />)}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <View style={styles.card}>
+        <View 
+          style={[
+            styles.card, 
+            selectedNumbers.includes(item.mobile) && { backgroundColor: '#FFFFFF' }]}
+        >
           <View style={{flex:1, justifyContent: 'center'}}>
             <Text style={styles.name}>{highlightText(item.name, searchQuery)}</Text>
             <Text style={styles.mobile}>{highlightText(item.mobile, searchQuery)}</Text>
           </View>
-          <TouchableOpacity>
-            <Image source={require('../../assets/vectors/plusViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
+          <TouchableOpacity onPress={() => addToList(item.mobile)}>
+            {
+              selectedNumbers.includes(item.mobile) ? (
+                <Image source={require('../../assets/vectors/tickViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
+              ):(
+                <Image source={require('../../assets/vectors/plusViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
+              )
+            }
           </TouchableOpacity>
         </View>
       )}/>
-      <LinearGradient
-        colors={['#342F33', '#9A8C98']}
-        style={{width: '100%', height: 52, position: 'absolute',paddingHorizontal: 17, bottom: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}>
-        <Text style={styles.counterText}>1 profile selected</Text>
-        <TouchableOpacity style={styles.sendButton}>
+      {
+        selectedNumbers.length>0 ? (
           <LinearGradient
-            colors={['#22223B', '#5D5DA1']}
-            style={styles.sendButton}
+            colors={['#342F33', '#9A8C98']}
+            style={{width: '100%', height: 52, position: 'absolute',paddingHorizontal: 17, bottom: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}>
-            <Text style={styles.counterText}>Send</Text>
+            <Text style={styles.counterText}>{selectedNumbers.length} profile selected</Text>
+            <TouchableOpacity style={styles.sendButton}>
+              <LinearGradient
+                colors={['#22223B', '#5D5DA1']}
+                style={styles.sendButton}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}>
+                <Text style={styles.counterText}>Send</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </LinearGradient>
-        </TouchableOpacity>
-      </LinearGradient>
+        ): null
+      }
   </View>
   );
 };
