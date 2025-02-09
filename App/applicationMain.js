@@ -14,13 +14,17 @@ const ApplicationMain = () => {
   const [customerId, setCustomerID] = useState("");
   const [toEdit, setToEdit] = useState(false);
   const [toAdd, setToAdd] = useState(false);
+  const [changePass, setChangePass] = useState(false);
+  const [terms, setTerms] = useState(false);
   
 
   useEffect(() => {
     const backAction = () => {
-      if (toAdd || toEdit) {
+      if (toAdd || toEdit || changePass || terms) {
         setToAdd(false);
         setToEdit(false);
+        setChangePass(false);
+        setTerms(false);
         return true;
       } else if (addCustomerPage) {
         setAddCustomerPage(false);
@@ -28,13 +32,25 @@ const ApplicationMain = () => {
       } else if (activePage !== 'Dashboard') {
         setActivePage('Dashboard');
         return true;
-      }
+      } 
       return false;
     };
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
   }, [activePage, addCustomerPage, toAdd, toEdit]);
+
+  useEffect(() => {
+    if (activePage !== 'Dashboard') {
+        setToAdd(false);
+        setToEdit(false);
+    }
+    if(activePage !== 'Settings') {
+      setChangePass(false);
+      setTerms(false);
+    }
+  }, [activePage]);
+
 
   const renderPage = () => {
     if (addCustomerPage) {
@@ -50,7 +66,9 @@ const ApplicationMain = () => {
       case 'Earnings':
         return <Earnings />;
       case 'Settings':
-        return <Settings />;
+        return <Settings changePass={changePass} terms={terms} sendToChange={setChangePass} sendTerms={setTerms}/>;
+      default:
+        return null;
     }
   };
 
