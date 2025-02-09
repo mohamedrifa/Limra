@@ -107,8 +107,11 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
       const { billItems, billTotals, ...filteredData } = snapshot.val();
       filteredData.isAddedToProfile = true;
       filteredData.date = moment().format('YYYY-MM-DD');
-      await set(ref(db, `/Tasks/${moment().format('YYYYMMDDHHmmss')}`), filteredData);
-      await update(ref(db, "Tasks"), { overallTasks: overallTasks + 1 });
+      await set(ref(db, `/Tasks/${customerId}`), filteredData);
+      const snapshot1 = await get(ref(db, `/Tasks/${customerId}`));
+      if (!snapshot1.exists()) {
+        await update(ref(db, "Tasks"), { overallTasks: overallTasks + 1 });
+      }
       Alert.alert("Success", "Task Added");
     } catch (error) {
       Alert.alert("Error", error.message);

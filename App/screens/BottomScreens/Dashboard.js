@@ -599,6 +599,11 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignSelf: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   addEditTaskText: {
     fontFamily: 'Poppins',
@@ -624,6 +629,11 @@ const styles = StyleSheet.create({
     borderColor: '#22223B',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   delConfirmText: {
     fontFamily: 'Questrial',

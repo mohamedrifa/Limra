@@ -145,7 +145,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText} >Mobile No.</Text>
-              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => setCustomer({ ...customer, mobile: text })}/>
+              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => setCustomer({ ...customer, mobile: text })} maxLength={10}/>
             </View>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText}>Date</Text>
