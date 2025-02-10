@@ -12,7 +12,6 @@ const generateDates = (month) => {
     moment(`${month}-${i + 1}`, "YYYY-MM-DD").format("dddd, MMM D YYYY")
   );
 };
-
 const Earnings = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(moment().format('YYYY-MM'));
@@ -62,7 +61,7 @@ const Earnings = () => {
       <LinearGradient 
         colors={['#5D5DA1', '#22223B']} 
         style={styles.topContainer}
-        start={{ x: 0, y: 0 }}
+        start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 0 }}>
         <Text style={styles.topText}>Monthly Earnings</Text>
         <View style={styles.picker}>
@@ -129,9 +128,6 @@ const Earnings = () => {
     </View>
   );
 };
-
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -17,10 +17,21 @@ const Messages = () => {
         const data = snapshot.val();
         if (data) {
           const customerList = Object.keys(data).map((key) => ({
-            id: key, 
-            ...data[key], 
+            id: key,
+            ...data[key],
           }));
-          setCustomers(customerList); 
+          const mergedCustomers = Object.values(
+            customerList.reduce((acc, customer) => {
+              const mobile = customer.mobile; 
+              if (!acc[mobile]) {
+                acc[mobile] = { ...customer, ids: [customer.id] };
+              } else {
+                acc[mobile].ids.push(customer.id);
+              }
+              return acc;
+            }, {})
+          );
+          setCustomers(mergedCustomers);
         } else {
           setCustomers([]);
         }
@@ -29,8 +40,12 @@ const Messages = () => {
         onlyOnce: false,
       }
     );
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
+  
+
+
+  
   const [searchQuery, setSearchQuery] = useState('');
   const filteredCustomers = customers.filter(item =>
     (item.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||

@@ -97,7 +97,6 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
   const addToTask = async (customerId) => {
     const db = getDatabase();
     const customerRef = ref(db, `/ServiceList/${customerId}`);
-    
     try {
       const snapshot = await get(customerRef); // Fetch customer data once
       if (!snapshot.exists()) return;
@@ -105,11 +104,12 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
       const overallSnapshot = await get(taskRef); // Fetch overallTasks count once
       const overallTasks = overallSnapshot.exists() ? overallSnapshot.val() : 0;
       const { billItems, billTotals, ...filteredData } = snapshot.val();
-      filteredData.isAddedToProfile = true;
+      filteredData.isAddedToProfile = false;
       filteredData.date = moment().format('YYYY-MM-DD');
-      await set(ref(db, `/Tasks/${customerId}`), filteredData);
-      const snapshot1 = await get(ref(db, `/Tasks/${customerId}`));
-      if (!snapshot1.exists()) {
+      const autoId = moment().format('YYYYMMDDHHmmss')
+      await set(ref(db, `/Tasks/${autoId}`), filteredData);
+      const snapshot1 = await get(ref(db, `/Tasks/${autoId}`));
+      if (snapshot1.exists()) {
         await update(ref(db, "Tasks"), { overallTasks: overallTasks + 1 });
       }
       Alert.alert("Success", "Task Added");
@@ -138,7 +138,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 ? 'Tomarrow'
                 : selectedDate === moment().add(-1, 'days').format('YYYY-MM-DD')
                 ? 'Yesterday'
-                : moment(selectedDate).format('DD-MM-YYYY')}
+                : moment(selectedDate).format('DD-MMM-YYYY')}
               </Text> )}
           <TouchableOpacity onPress={searchHandler} style={{position: 'absolute', right: 18, top: 7}}>
             <Image source={require('../../assets/vectors/search.png')} style={{width: 30, height: 30}} />
@@ -168,21 +168,11 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 style={styles.dateFlat}
                 keyExtractor={(item) => item}
                 renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.dateItem}
-                    onPress={() => setSelectedDate(item)}
-                  >
-                    <Text
-                      style={[
-                        styles.dayText,
-                        moment(item).format('ddd')=== "Sun" && styles.sunday,
-                      ]}
-                    >
+                  <TouchableOpacity style={styles.dateItem} onPress={() => setSelectedDate(item)}>
+                    <Text style={[styles.dayText,moment(item).format('ddd')=== "Sun" && styles.sunday,]}>
                       {moment(item).format('ddd').toUpperCase()}
                     </Text>
-                    <Text
-                      style={styles.dateText}
-                    >
+                    <Text style={styles.dateText}>
                       {moment(item).format('DD')}
                     </Text>
                     <View  style={[selectedDate === item && styles.selectedDateLine]}/>
@@ -193,6 +183,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
           ):null
         }
         <View style={styles.serviceListContainer}>
+          <Text style={styles.noDataText}>No Entries</Text>
           {!searchActive ? (
             <View style={styles.addButtonContainer}>
             <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={customerAdd}>
@@ -299,14 +290,15 @@ const styles = StyleSheet.create({
   },
   dateFlat: {
     width: '100%',
-    height: 55,
+    height: 60,
     alignContent: 'center',
   },
   dateItem: {
-    width: 32,
+    width: 'auto',
+    height: 55,
     marginRight: 10,
     alignItems: 'center',
-    alignSelf: 'center',
+    justifyContent: 'center',
     borderRadius: 5,
   },
   dateText: {
@@ -375,9 +367,19 @@ const styles = StyleSheet.create({
     height: 0.5,
     backgroundColor: '#22223B',
   },
+  noDataText: {
+    fontFamily: 'Poppins',
+    alignSelf: 'center',
+    marginTop: 100,
+    fontSize: 16,
+    fontWeight: 300,
+    position: 'absolute',
+    color: '#4A4E69'
+  },
   card: {
     width: '100%',
     height: 215,
+    backgroundColor: '#EBEEFF',
     justifyContent: 'space-between',
   },
   listView: {

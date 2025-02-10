@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect}from 'react';
 import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler} from 'react-native';
-import {  ref, onValue, set, update} from 'firebase/database';
+import {  ref, onValue, set, update, get} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -128,12 +128,16 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         .then(() => console.log("Status updated successfully"))
         .catch((error) => console.error("Error updating status:", error));
     };
+    const topUpdate = async (taskId) => {
+      const isAddedToProfile = await get(ref(database, `Tasks/${taskId}/isAddedToProfile`));
+      if (isAddedToProfile.val()) {
+      update(ref(database, 'Tasks'), { completedTasks: completedTasks + 1 })
+              .then(() => console.log('Success'))
+              .catch(error => console.log(error));}
+    };
     const deleteTask = async (taskId) => {
       set(ref(database, `Tasks/${taskId}`), null)
-          .then(() => {
-            update(ref(database, 'Tasks'), { completedTasks: completedTasks + 1 })
-              .then(() => console.log('Success'))
-              .catch(error => console.log(error));})
+          .then(() => console.log('Success'))
           .catch(error => console.log(error));
     };
     const [animations, setAnimations] = useState([]);
@@ -153,6 +157,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       }).start(() => {      
         const updatedTasks = tasks.filter(task => task.id !== tempTaskId);
         setTasks(updatedTasks);
+        topUpdate(tempTaskId);
         deleteTask(tempTaskId);
         setTempIndex(null);
         setTempTaskId(null);
@@ -229,14 +234,15 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       <Text style={styles.plainText}>Pending Tasks</Text>
       <Image source={require('../../assets/vectors/arrow_right.png')} style={styles.plainIcon}/>
     </View>
-    <View style={{width: '100%', height: '438', marginTop: 19}}>
+    <View style={{width: '100%', height: '438', marginTop: 18.5}}>
       <FlatList
         data={tasks}
         horizontal
-        style={{ marginTop: 10 }}
+        style={{ height: '100%' }}
         showsHorizontalScrollIndicator={false}
-        ListHeaderComponent={<View style={{width:17}} />}
-        ListFooterComponent={<View style={{width:7}} />}
+        ListHeaderComponent={<View style={{width:7}} />}
+        ListFooterComponent={<View style={{width:17}} />}
+        inverted={true}
         keyExtractor={(item) => item.id}
         renderItem={renderItem} />
     </View>
@@ -258,7 +264,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
           <View style={styles.addTaskContainer}>
               <TextInput style={styles.input} placeholder='Name' placeholderTextColor={'#4A4E69'} value={customer.name} onChangeText={(text) => setCustomer({ ...customer, name: text })}/>
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => setCustomer({ ...customer, mobile: text })}/>
+                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' maxLength={10} placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => setCustomer({ ...customer, mobile: text })}/>
                 <TouchableOpacity onPress={() => setOpen(true)} style={[styles.input,{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 47}]}>
                   <Image source={require('../../assets/vectors/calender.png')} style={{width: 25, height: 25, resizeMode: 'contain'}}/>
                   <DatePicker
@@ -398,10 +404,16 @@ const styles = StyleSheet.create({
   },
   cardView: {
     width: 249,
-    height: '100%',
+    height: '98%',
     backgroundColor: '#FFFFFF',
     borderRadius: 25,
     marginRight: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   serviceTypeImage: {
     width: '100%',
