@@ -19,17 +19,24 @@
               width: 76px;
               height: 22px;
               display: grid;
+              margin: 14px auto;
+          }
+          .invoiceText {
+              font-family: 'Poppins';
+              font-size: 12px;
+              font-weight: 300;
               margin-top: 37px;
-              margin: 37px auto;
+              color: #22223B;
+              text-align: center;
           }
           .DateIdContainer {
               width: 100%;
-              display: flex;
-              justify-content: space-between;
-              flex-direction: row;
               margin-top: 22px;
           }
           .DateIdText {
+              width: 100%;
+              height: 10px;
+              text-align: right;
               font-family: 'Poppins';
               font-size: 14px;
               font-weight: 400;
@@ -85,25 +92,44 @@
               margin-top: 42px;
               justify-content:space-between;
               height: 96px;
-              width: 209px;
+              width: 100%;
           }
           .technicianName {
+              width: 100%;
+              text-align: right;
               font-family: 'Poppins';
-              font-size: 20px;
+              font-size: 16px;
               font-weight: 400;
               color: #22223B;
           }
           .technicianNo {
+              width: 100%;
+              text-align: right;
               font-family: 'Quantico';
               font-size: 14px;
               font-weight: 400;
               color: #22223B;
           }
-          .technicianAddress {
+          .technicianMail {
+              width: 100%;
+              text-align: right;
               font-family: 'Poppins';
               font-size: 16px;
               font-weight: 400;
               color: #22223B;
+          }
+          .addressPassage {
+              text-align: center;
+              width: 100%; 
+              height: 30px;
+              max-width: 300px;
+              font-family: 'Poppins';
+              font-weight: 400;
+              font-size: 16px;
+              margin-top: 22px;
+              color: #22223B;
+              margin-left: auto;
+              margin-right: auto;
           }
           .servicesPassage {
               text-align: center;
@@ -113,7 +139,6 @@
               font-family: 'Poppins';
               font-weight: 400;
               font-size: 16px;
-              margin-top: 22px;
               color: #22223B;
               margin-left: auto;
               margin-right: auto;
@@ -122,9 +147,10 @@
   </head>
   <body>
       <div class="container">
+          <p class="invoiceText"><u>Invoice</u></p>
           <div class="DateIdContainer">
-              <p class="DateIdText">Date : ${customer.date}</p>
               <p class="DateIdText">Bill no : ${customerId}</p>
+              <p class="DateIdText">Date : ${customer.date}</p>
           </div>
           <div class="customerDetails">
               <p class="customerName">${customer.name}</p>
@@ -162,9 +188,10 @@
           </table>
           <div class="technicianView">
               <p class="technicianName">Shahathul Ameen</p>
-              <p class="technicianNo">9092443584</p>
-              <p class="technicianAddress">Bharathi Street, Kuttalam</p>
+              <p class="technicianNo">9092443584,9094711256</p>
+              <p class="technicianMail">Email: Shahathul@gmail.com</p>
           </div>
+          <p class="addressPassage">NO 2, Bharathi Street, Kuthalam 609801</p>
           <p class="servicesPassage">AC/Washing Machine/Refrigerator/Microwave/water Purifier & All Brand Services</p>
       </div>
   </body>

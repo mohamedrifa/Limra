@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, Image, FlatList } from 'react-native';
 import { ref, onValue } from 'firebase/database';
 import LinearGradient from 'react-native-linear-gradient';
 import { database } from '../../../firebase';
@@ -45,6 +45,8 @@ const Messages = () => {
   
 
 
+  const [toWhatsapp, setToWhatsapp] = useState(true);
+  const toggleSwitch = () => setToWhatsapp(previousState => !previousState);
   
   const [searchQuery, setSearchQuery] = useState('');
   const filteredCustomers = customers.filter(item =>
@@ -81,7 +83,8 @@ const Messages = () => {
   const sendWhatsAppMessage = async () => {
     if(message === null || message ===''){
       return null;
-    } else{
+    } 
+    else if (toWhatsapp) {
       for (let i = 0; i < selectedNumbers.length; i++) {
         const number = selectedNumbers[i];
         const whatsappUrl = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
@@ -89,6 +92,22 @@ const Messages = () => {
           await new Promise((resolve) => {
             Linking.openURL(whatsappUrl).catch(() => {
               Alert.alert("Error", "Unable to open WhatsApp for " + number);
+            });
+            setTimeout(resolve, 4000); // 5 seconds delay
+          });
+        } catch (error) {
+          console.error("Error processing number:", number, error);
+        }
+      }
+    }
+    else {
+      for (let i = 0; i < selectedNumbers.length; i++) {
+        const number = selectedNumbers[i];
+        const smsUrl = `sms:${number}?body=${encodeURIComponent(message)}`;
+        try {
+          await new Promise((resolve) => {
+            Linking.openURL(smsUrl).catch(() => {
+              Alert.alert("Error", "Unable to open SMS for " + number);
             });
             setTimeout(resolve, 4000); // 5 seconds delay
           });
@@ -166,6 +185,29 @@ const Messages = () => {
         { toSend && (
           <View style={styles.blurView} >
             <View style={styles.sendTaskContainer}>
+              <View style={{width: '100%', flexDirection: 'row-reverse'}}>
+                <LinearGradient
+                  colors={toWhatsapp ? ['#2D3436', '#D3D3D3']: ['#D3D3D3', '#2D3436']}
+                  style={[styles.switchContainer, toWhatsapp && styles.switchActive]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}>
+                  <Switch
+                    trackColor={{ false: 'transparent', true: 'transparent' }} // Grey & Green track colors
+                    thumbColor={toWhatsapp ? '#ffffff' : '#f4f3f4'} // White thumb
+                    thumbBorderColor={'#22223B'}
+                    thumbBorderWidth={1}
+                    onValueChange={toggleSwitch}
+                    value={toWhatsapp}
+                    style={styles.switch}
+                  />
+                </LinearGradient>
+                { toWhatsapp ? (
+                  <Image source={require('../../assets/vectors/whatsappBlack.png')} style={styles.messageImage}/>
+                ):(
+                  <Image source={require('../../assets/vectors/sms.png')} style={styles.messageImage}/>
+                )
+                }
+              </View>
               <TextInput 
               style={styles.input} 
               placeholder='Enter Your Message Here'
@@ -177,7 +219,7 @@ const Messages = () => {
               />
               <View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between',alignItems: 'center', paddingHorizontal: 10,}}>
                 <TouchableOpacity style={[styles.sendConfirmButton, {borderWidth: 1}]} onPress={()=>setToSend(false)}>
-                  <Text style={[styles.delConfirmText, {color: '#22223B'}]}>Close</Text>
+                  <Text style={[styles.sendConfirmText, {color: '#22223B'}]}>Close</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.sendConfirmButton} onPress={()=> {sendWhatsAppMessage()}}>
                   <LinearGradient
@@ -185,7 +227,7 @@ const Messages = () => {
                     style={[styles.sendConfirmButton, {width: '100%'}]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}>
-                    <Text style={[styles.delConfirmText, {color: '#FFFFFF'}]}>Send</Text>
+                    <Text style={[styles.sendConfirmText, {color: '#FFFFFF'}]}>Send</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
@@ -292,7 +334,7 @@ const styles = StyleSheet.create({
   },
   sendConfirmButton: {
     width: '48%',
-    height: 50,
+    height: 42,
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
@@ -303,9 +345,36 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
+  switchContainer: {
+    width: 55,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#22223B',
+    backgroundColor: '#4CAF50',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10
+  },
+  switchActive: {
+    backgroundColor: '#bbb',
+  },
+  switch: {
+    transform: [{ scale: 1.2 }], 
+  },
+  messageImage: {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain',
+    marginRight: 10,
+  },
+  sendConfirmText: {
+    fontFamily: 'Poppins',
+    fontSize: 16,
+    fontWeight: 300,
+  },
   input: {
     width: '100%',
-    height: '80%',
+    height: '65%',
     borderColor: '#22223B',
     color: '#4A4E69',
     fontFamily: 'Poppins',

@@ -55,7 +55,11 @@ const Earnings = () => {
     return sum + Number(customerMonth === selectedMonthFormatted ? (customer.billTotals?.commisionTotal || 0) : 0);
   }, 0);
 
-
+  let monthlyServices = customers.reduce((sum, customer) => {
+    let customerMonth = moment(customer.date).format("YYYY-MM");
+    let selectedMonthFormatted = moment(selectedMonth).format("YYYY-MM");
+    return sum + Number(customerMonth === selectedMonthFormatted ? 1 : 0);
+  }, 0);
   return (
     <View style={styles.container}>
       <LinearGradient 
@@ -80,8 +84,16 @@ const Earnings = () => {
             <Image source={require('../../assets/vectors/pickerDownArrow.png')} style={{ width: 8, height: 8, resizeMode: 'cover', marginLeft: 5 }} />
           </TouchableOpacity>
         </View>
-        <Text style={styles.totalEarningsText}>Total Earnings</Text>
-        <Text style={styles.totalText}>₹{monthlyEarnings}</Text>
+        <View style={{width: 254, height: 71, flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center'}}>
+            <View>
+              <Text style={styles.totalEarningsText}>Total Services</Text>
+              <Text style={styles.totalText}>{monthlyServices}</Text>
+            </View>
+            <View>
+              <Text style={styles.totalEarningsText}>Total Earnings</Text>
+              <Text style={styles.totalText}>₹{monthlyEarnings}</Text>
+            </View>
+        </View>
       </LinearGradient>
       <FlatList
         data={dates}
