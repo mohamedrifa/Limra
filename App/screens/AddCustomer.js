@@ -239,17 +239,17 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableSNo}><Text style={styles.headerText}>{item.id}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableParticulars}><TextInput style={styles.inputText} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
+                    <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={[styles.inputText,{textAlign: 'center'}]} keyboardType="numeric" value={item.rate|| ''} onChangeText={(text) => handleInputChange(index, 'rate', text)} /></View>
+                    <View style={styles.tableRate}><TextInput style={styles.inputText} keyboardType="numeric" value={item.rate|| ''} onChangeText={(text) => handleInputChange(index, 'rate', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableQty}><TextInput style={[styles.inputText,{textAlign: 'center'}]} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
+                    <View style={styles.tableQty}><TextInput style={styles.inputText} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
+                    <View style={styles.tableTotal}><Text style={[styles.inputText,{width: '100%', textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableOgPrice}><TextInput style={[styles.inputText,{textAlign: 'right'}]} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
+                    <View style={styles.tableOgPrice}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
-                    <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
+                    <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
                     <View style={styles.tableVerticalLine2}/>
                   </View>
                   <View style={{flexDirection: 'row'}}>
@@ -271,11 +271,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                 <View style={styles.tableVerticalLine1}/>
                 <View style={styles.overallTotal}><Text style={styles.headerText}>Total</Text></View>
                 <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableTotal}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.customTotal}</Text></View>
+                <View style={styles.tableTotal}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.customTotal}</Text></View>
                 <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.ogTotal}</Text></View>
+                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.ogTotal}</Text></View>
                 <View style={styles.tableVerticalLine2}/>
-                <View style={styles.tableCommision}><Text style={[styles.inputText,{textAlign: 'right', marginRight: 8}]}>{billTotals.commisionTotal}</Text></View>
+                <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.commisionTotal}</Text></View>
                 <View style={styles.tableVerticalLine2}/>
               </View>
               <View style={{flexDirection: 'row'}}>
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     color: '#4A4E69'
   },
   input: {
-    height: 43,
+    height: 47,
     borderColor: '#22223B',
     color: '#4A4E69',
     fontFamily: 'Poppins',
@@ -441,6 +441,7 @@ const styles = StyleSheet.create({
   tableRate: {
     width: 82,
     height: 38,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -477,9 +478,8 @@ const styles = StyleSheet.create({
   inputText: {
     fontFamily: 'Poppins',
     fontWeight: 400,
-    height: 40,
+    height: 60,
     textAlignVertical: 'center',
-    width: '100%',
     color: '#22223B',
   },
   addRowButton: {

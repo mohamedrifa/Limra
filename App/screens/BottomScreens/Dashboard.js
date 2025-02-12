@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect}from 'react';
 import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler} from 'react-native';
-import {  ref, onValue, set, update, get} from 'firebase/database';
+import {  ref, onValue, set, update, get, remove} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -14,6 +14,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
   const [tempTaskId, setTempTaskId] = useState(null); 
   const [overallTasks, setOverallTasks] = useState();
   const [completedTasks, setCompletedTasks] = useState();
+  const [refresh, setRefresh] = useState(true);
 
   useEffect(() => {
     const customerRef = ref(database, "Tasks");
@@ -135,11 +136,21 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
               .then(() => console.log('Success'))
               .catch(error => console.log(error));}
     };
+
     const deleteTask = async (taskId) => {
-      set(ref(database, `Tasks/${taskId}`), null)
-          .then(() => console.log('Success'))
-          .catch(error => console.log(error));
+      try {
+        await remove(ref(database, `Tasks/${taskId}`));
+        console.log("Task deleted successfully");
+        setRefresh(false);
+        setTimeout(() => {
+          setRefresh(prev => !prev);
+        }, 100); 
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
     };
+
+    
     const [animations, setAnimations] = useState([]);
     useEffect(() => {
       const newAnimations = tasks.map(() => new Animated.Value(0));
@@ -234,17 +245,19 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       <Text style={styles.plainText}>Pending Tasks</Text>
       <Image source={require('../../assets/vectors/arrow_right.png')} style={styles.plainIcon}/>
     </View>
-    <View style={{width: '100%', height: '438', marginTop: 18.5}}>
+    <View style={{flex: 1, marginTop: 18.5, width: '100%', alignItems: 'flex-start'}}>
+    { refresh && 
       <FlatList
-        data={tasks}
+        data={[...tasks].reverse()}
         horizontal
         style={{ height: '100%' }}
         showsHorizontalScrollIndicator={false}
-        ListHeaderComponent={<View style={{width:7}} />}
-        ListFooterComponent={<View style={{width:17}} />}
-        inverted={true}
+        ListHeaderComponent={<View style={{width:17}} />}
+        ListFooterComponent={<View style={{width:7}} />}
         keyExtractor={(item) => item.id}
-        renderItem={renderItem} />
+        renderItem={renderItem} 
+        />
+    }
     </View>
       <View style={{width: '100%', height: '43', marginTop: 14.5,marginBottom: 85, paddingHorizontal: 17,flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
         <Text style={styles.addTaskText}>Add new tasks to your dashboard</Text>
@@ -470,7 +483,6 @@ const styles = StyleSheet.create({
   cardButtonView: {
     width: '100%',
     height: 61,
-    color: '',
     position: 'absolute',
     padding: 10,
     bottom: 0,

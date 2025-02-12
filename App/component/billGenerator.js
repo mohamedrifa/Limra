@@ -98,7 +98,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
   .join('');
   try{
     return `
-    <!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="en">
   <head>
       <title>Invoice</title>
@@ -150,19 +150,31 @@ const bill = (customerId, customer, billItems, billTotals) => {
           }
           .customerName {
               font-family: 'Poppins';
-              font-weight: 400;
+              font-weight: 700;
               font-size: 20px;
               color: #22223B;
           }
-          .customerData {
+          .customerCity {
               font-family: 'Poppins';
-              font-weight: 400;
+              font-weight: 700;
+              font-size: 14;
+              color: #22223B;
+          }
+          .customerAddress {
+              font-family: 'Poppins';
+              font-weight: 600;
+              font-size: 14;
+              color: #22223B;
+          }
+          .customerService {
+              font-family: 'Poppins';
+              font-weight: 600;
               font-size: 14;
               color: #22223B;
           }
           .customerMobile {
               font-family: 'Quantico';
-              font-weight: 400;
+              font-weight: 700;
               font-size: 14;
               color: #22223B;
           }
@@ -178,7 +190,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               border: 1px solid #22223B;
               font-family: 'Poppins';
               font-size: 14px;
-              font-weight: 400;
+              font-weight: 600;
               padding-top: 8px;
               padding-bottom: 8px;
               text-align: center;
@@ -188,6 +200,15 @@ const bill = (customerId, customer, billItems, billTotals) => {
               padding: 8px;
               text-align: center;
           }
+          .table th{
+              border: 1px solid #22223B;
+              font-family: 'Poppins';
+              font-size: 14px;
+              font-weight: 700;
+              padding-top: 8px;
+              padding-bottom: 8px;
+              text-align: center;
+          } 
           .technicianView {
               margin-top: 42px;
               justify-content:space-between;
@@ -199,7 +220,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               text-align: right;
               font-family: 'Poppins';
               font-size: 16px;
-              font-weight: 400;
+              font-weight: 700;
               color: #22223B;
           }
           .technicianNo {
@@ -207,7 +228,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               text-align: right;
               font-family: 'Quantico';
               font-size: 14px;
-              font-weight: 400;
+              font-weight: 700;
               color: #22223B;
           }
           .technicianMail {
@@ -215,7 +236,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               text-align: right;
               font-family: 'Poppins';
               font-size: 16px;
-              font-weight: 400;
+              font-weight: 700;
               color: #22223B;
           }
           .addressPassage {
@@ -224,7 +245,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               height: 30px;
               max-width: 300px;
               font-family: 'Poppins';
-              font-weight: 400;
+              font-weight: 600;
               font-size: 16px;
               margin-top: 22px;
               color: #22223B;
@@ -237,7 +258,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               max-width: 466px;
               height: 48px;
               font-family: 'Poppins';
-              font-weight: 400;
+              font-weight: 500;
               font-size: 16px;
               color: #22223B;
               margin-left: auto;
@@ -255,9 +276,9 @@ const bill = (customerId, customer, billItems, billTotals) => {
           </div>
           <div class="customerDetails">
               <p class="customerName">${customer.name}</p>
-              <p class="customerData">${customer.city}</p>
-              <p class="customerData">${customer.address}</p>
-              <p class="customerData">${customer.serviceType}</p>
+              <p class="customerCity">${customer.city}</p>
+              <p class="customerAddress">${customer.address}</p>
+              <p class="customerService">${customer.serviceType}</p>
               <p class="customerMobile">${customer.mobile}</p>
           </div>
           <div style="height: 40px;"></div>
@@ -274,7 +295,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
               <tbody>${tableRow}</tbody>
               <tfoot>
                   <tr>
-                      <td colspan="4" class="table">Total</td>
+                      <td colspan="4" class="table" style="font-weight: 700;">Total</td>
                       <td id="custom-total" style="text-align: right;">${billTotals.customTotal}</td>
                   </tr>
               </tfoot>
