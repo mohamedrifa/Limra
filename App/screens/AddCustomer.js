@@ -88,6 +88,15 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     setBillTotals(updatedBillTotals);
     setBillItems(updatedBillItems);
   };
+
+  const ogChange = (index, field, value) => {
+    const updatedBillItems = [...billItems];
+    updatedBillItems[index][field] = value;
+    updatedBillItems[index]['originalPrice'] = updatedBillItems[index]['total'];
+    updatedBillItems[index]['commission'] = (updatedBillItems[index]['total'] - updatedBillItems[index]['originalPrice']).toFixed(2);
+    setBillItems(updatedBillItems);
+  };
+
   const handleSubmit = () => {
     const db = getDatabase();
     if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
@@ -223,7 +232,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                 <View style={styles.tableVerticalLine1}/>
                 <View style={styles.tableOgPrice}><Text style={styles.headerText}>Original Price</Text></View>
                 <View style={styles.tableVerticalLine2}/>
-                <View style={styles.tableCommision}><Text style={styles.headerText}>Commision</Text></View>
+                <View style={styles.tableCommision}><Text style={styles.headerText}>Balance</Text></View>
                 <View style={styles.tableVerticalLine2}/>
               </View>
               <View style={{flexDirection: 'row'}}>
@@ -241,13 +250,13 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={styles.inputText} keyboardType="numeric" value={item.rate|| ''} onChangeText={(text) => handleInputChange(index, 'rate', text)} /></View>
+                    <View style={styles.tableRate}><TextInput style={styles.inputText} keyboardType="numeric" value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableQty}><TextInput style={styles.inputText} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableTotal}><Text style={[styles.inputText,{width: '100%', textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableOgPrice}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
+                    <View style={[styles.tableOgPrice, {alignItems: 'flex-end'}]}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
                     <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
                     <View style={styles.tableVerticalLine2}/>
