@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, Image, FlatList } from 'react-native';
 import { ref, onValue } from 'firebase/database';
 import LinearGradient from 'react-native-linear-gradient';
-import { database } from '../../../firebase';
+import { database } from '../../firebase';
 import { Linking } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -131,7 +131,7 @@ const Messages = () => {
         style={styles.searchBar} 
         placeholderTextColor={'#4A4E69'}/>
         <TouchableOpacity style={{width: 30, height: 30, alignSelf: 'center'}}>
-          <Image source={require('../../assets/vectors/search.png')} style={{width: 30, height: 30, resizeMode: 'contain'}}/>
+          <Image source={require('../assets/vectors/search.png')} style={{width: 30, height: 30, resizeMode: 'contain'}}/>
         </TouchableOpacity>
       </View>
     </View>
@@ -155,9 +155,9 @@ const Messages = () => {
           <TouchableOpacity onPress={() => addToList(item.mobile)}>
             {
               selectedNumbers.includes(item.mobile) ? (
-                <Image source={require('../../assets/vectors/tickViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
+                <Image source={require('../assets/vectors/tickViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
               ):(
-                <Image source={require('../../assets/vectors/plusViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
+                <Image source={require('../assets/vectors/plusViolet.png')} style={{width: 22, height: 22, resizeMode: 'contain'}}/>
               )
             }
           </TouchableOpacity>
@@ -165,10 +165,10 @@ const Messages = () => {
       )}/>
       { selectedNumbers.length>0 ? (
           <LinearGradient
-            colors={['#342F33', '#9A8C98']}
-            style={{width: '100%', height: 52, position: 'absolute',paddingHorizontal: 17, bottom: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+            colors={['#F9FBFFCF', '#F9FBFF']}
+            style={{width: '100%', height: 70, position: 'absolute',paddingHorizontal: 17, bottom: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}>
+            end={{ x: 0, y: 1 }}>
             <Text style={styles.counterText}>{selectedNumbers.length} profile selected</Text>
             <TouchableOpacity style={styles.sendButton} onPress={() => setToSend(true)}>
               <LinearGradient
@@ -176,7 +176,7 @@ const Messages = () => {
                 style={styles.sendButton}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}>
-                <Text style={styles.counterText}>Send</Text>
+                <Text style={styles.counterButtonText}>Send</Text>
               </LinearGradient>
             </TouchableOpacity>
           </LinearGradient>
@@ -202,9 +202,9 @@ const Messages = () => {
                   />
                 </LinearGradient>
                 { toWhatsapp ? (
-                  <Image source={require('../../assets/vectors/whatsappBlack.png')} style={styles.messageImage}/>
+                  <Image source={require('../assets/vectors/whatsappBlack.png')} style={styles.messageImage}/>
                 ):(
-                  <Image source={require('../../assets/vectors/sms.png')} style={styles.messageImage}/>
+                  <Image source={require('../assets/vectors/sms.png')} style={styles.messageImage}/>
                 )
                 }
               </View>
@@ -298,6 +298,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   counterText: {
+    fontFamily: 'Poppins',
+    fontSize: 14,
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 400,
+    color: '#22223B'
+  },
+  counterButtonText: {
     fontFamily: 'Poppins',
     fontSize: 20,
     fontWeight: 400,

@@ -73,9 +73,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    width: 63,
-    height: 27,
-    resizeMode: 'contain',
+    width: 61,
+    height: 14,
+    resizeMode: 'cover',
     marginTop: 53,
     alignSelf: 'flex-start',
   },

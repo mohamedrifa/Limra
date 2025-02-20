@@ -78,8 +78,10 @@ export default function Settings ({changePass, terms, sendToChange, sendTerms}) 
   return (
     <View style={styles.container}>
       <Image source={require('../../assets/images/settingsbg.png')} style={styles.bgImage}/>
+      <View style={{alignItems: 'center'}} >
       <Image source={require('../../assets/images/LIMRA.png')} style={styles.titleImage}/>
       <Text style={styles.text}>custom technician app</Text>
+      </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={changePassword}>
           <Text style={styles.containerText}>🔑 Change password</Text>
@@ -196,6 +198,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#EBEBFF'
   },
   bgImage: {
@@ -219,7 +222,6 @@ const styles = StyleSheet.create({
     width: 328,
     height: 195,
     justifyContent: 'space-between',
-    marginTop: 83
   },
   containerText: {
     fontFamily: 'Poppins',
@@ -237,6 +239,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     marginTop: 48,
+    marginBottom: 100
   },
   buttonText: {
     fontSize: 20,

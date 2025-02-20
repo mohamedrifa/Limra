@@ -115,7 +115,11 @@ const Earnings = () => {
                 <Text style={{ fontFamily: 'Poppins', fontSize: 14, fontWeight: '300', color: '#22223B' }}>Day</Text>
                 <Text style={{ fontFamily: 'Quantico', fontSize: 14, fontWeight: '400', color: '#22223B' }}>{moment(date).format("D")}</Text>
               </View>
-              <ScrollView style={{ height: 42, width: '100%' }}>
+              <ScrollView 
+                style={{ height: 42, width: '100%' }}
+                scrollEnabled={true}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}>
                 {dateWise.map((customer) => (
                   <Text key={customer.id} style={{ fontFamily: 'Poppins', fontSize: 14, fontWeight: 300, color: '#22223B', marginTop: 10 }}>
                     {customer.serviceType} - {customer.name}
@@ -127,12 +131,17 @@ const Earnings = () => {
                   <Text style={styles.perDayText}>{dailyEarnings}</Text>
                   <Image source={require('../../assets/vectors/plusViolet.png')} style={styles.perDayIcon} />
                 </View>
-              ):(
+              ): dailyEarnings>0 ?(
                 <View style={styles.perDayContainer}>
                   <Text style={styles.perDayText}>{-dailyEarnings}</Text>
                   <Image source={require('../../assets/vectors/minusViolet.png')} style={styles.perDayIcon} />
                 </View>
-              )}
+              ):(
+                <View style={styles.perDayContainer}>
+                  <Text style={styles.perDayText}>{-dailyEarnings}</Text>
+                </View>
+              )
+              }
             </View>
           );
         }}

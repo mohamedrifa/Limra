@@ -8,7 +8,7 @@ import { Linking } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 
-export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
+export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, sendCustomerId}){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
@@ -196,11 +196,16 @@ export default function ServiceAdd({ navigateToCustomerAdd, sendCustomerId}){
                 <Text style={styles.addText}>Add Customer Profile</Text>
               </LinearGradient>
             </TouchableOpacity>
-            <LinearGradient
+            <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={() => navigateToMessages()}>
+              <LinearGradient
                 colors={['#22223B', '#5D5DA1']}
-                style={[styles.addButton, {width: '49%'}]}
+                style={[styles.addButton, {width: '100%'}]}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}/>
+                end={{ x: 1, y: 0 }}>
+                <Image source={require('../../assets/vectors/messageWhite.png')} style={styles.addIcon} />
+                <Text style={styles.addText}>Messages</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
           ): null
           }
@@ -347,8 +352,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#C9ADA7',
   },
   addIcon: {
-    width: 16,
-    height: 16,
+    width: 25,
+    height: 25,
     marginLeft: 10,
   },
   addText: {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect} from 'react';
-import { View, Image, TouchableOpacity, StyleSheet, BackHandler} from 'react-native';
+import { View, Image, Text, TouchableOpacity, StyleSheet, BackHandler} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Dashboard from './screens/BottomScreens/Dashboard';
 import ServiceAdd from './screens/BottomScreens/ServiceAdd';
 import Earnings from './screens/BottomScreens/Earnings';
-import Messages from './screens/BottomScreens/Messages';
+import Messages from './screens/Messages';
 import Settings from './screens/BottomScreens/Settings';
 import AddCustomer from './screens/AddCustomer';
 
@@ -16,6 +16,7 @@ const ApplicationMain = () => {
   const [toAdd, setToAdd] = useState(false);
   const [changePass, setChangePass] = useState(false);
   const [terms, setTerms] = useState(false);
+  const [messagesPage, setMessagesPage] = useState(false);
   
 
   useEffect(() => {
@@ -29,6 +30,9 @@ const ApplicationMain = () => {
       } else if (addCustomerPage) {
         setAddCustomerPage(false);
         return true;
+      } else if (messagesPage) {
+        setMessagesPage(false);
+        return true;
       } else if (activePage !== 'Dashboard') {
         setActivePage('Dashboard');
         return true;
@@ -38,7 +42,7 @@ const ApplicationMain = () => {
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [activePage, addCustomerPage, toAdd, toEdit]);
+  }, [activePage, addCustomerPage, messagesPage, toAdd, toEdit]);
 
   useEffect(() => {
     if (activePage !== 'Dashboard') {
@@ -56,15 +60,16 @@ const ApplicationMain = () => {
     if (addCustomerPage) {
       return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} customerId={customerId}/>;
     }
+    if (messagesPage) {
+      return <Messages/>
+    }
     switch (activePage) {
       case 'Dashboard':
         return <Dashboard toAdd={toAdd} toEdit={toEdit} sendToAdd={setToAdd} sendToEdit={setToEdit}/>;
       case 'ServiceAdd':
-        return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} sendCustomerId={setCustomerID}/>;
-      case 'Messages':
-        return <Messages />;
+        return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} navigateToMessages={() => setMessagesPage(true)} sendCustomerId={setCustomerID}/>;
       case 'Earnings':
-        return <Earnings />;
+        return <Earnings/>;
       case 'Settings':
         return <Settings changePass={changePass} terms={terms} sendToChange={setChangePass} sendTerms={setTerms}/>;
       default:
@@ -75,7 +80,7 @@ const ApplicationMain = () => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>{renderPage()}</View>
-      {!addCustomerPage && (
+      {!(addCustomerPage || messagesPage) && (
         <LinearGradient colors={['#F9FBFFCF', '#F9FBFF']} style={styles.navContainer}>
           <TouchableOpacity onPress={() => setActivePage('Dashboard')} style={styles.navButton}>
             <Image
@@ -86,6 +91,7 @@ const ApplicationMain = () => {
               }
               style={[styles.icon, activePage === 'Dashboard' && styles.selectedIcon]}
             />
+            <Text style={[styles.bottomText, activePage === 'Dashboard' && {color: '#22223B'}]}>Dashboard</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActivePage('ServiceAdd')} style={styles.navButton}>
             <Image
@@ -96,16 +102,7 @@ const ApplicationMain = () => {
               }
               style={[styles.icon, activePage === 'ServiceAdd' && styles.selectedIcon]}
             />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActivePage('Messages')} style={styles.navButton}>
-            <Image
-              source={
-                activePage === 'Messages'
-                  ? require('./assets/BottomNavVector/Messages1.png')
-                  : require('./assets/BottomNavVector/Messages.png')
-              }
-              style={[styles.icon, activePage === 'Messages' && styles.selectedIcon]}
-            />
+            <Text style={[styles.bottomText, activePage === 'ServiceAdd' && {color: '#22223B'}]}>Profiles</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActivePage('Earnings')} style={styles.navButton}>
             <Image
@@ -116,6 +113,7 @@ const ApplicationMain = () => {
               }
               style={[styles.icon, activePage === 'Earnings' && styles.selectedIcon]}
             />
+            <Text style={[styles.bottomText, activePage === 'Earnings' && {color: '#22223B'}]}>Earnings</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setActivePage('Settings')} style={styles.navButton}>
             <Image
@@ -126,6 +124,7 @@ const ApplicationMain = () => {
               }
               style={[styles.icon, activePage === 'Settings' && styles.selectedIcon]}
             />
+            <Text style={[styles.bottomText, activePage === 'Settings' && {color: '#22223B'}]}>Settings</Text>
           </TouchableOpacity>
         </LinearGradient>
       )}
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   navButton: {
-    width: 50,
+    width: 54,
     height: 50,
     justifyContent: 'center',
   },
@@ -166,6 +165,13 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     resizeMode: 'contain',
+  },
+  bottomText: {
+    fontSize: 10,
+    color: '#4A4E69',
+    fontWeight: 400,
+    fontFamily: 'Open Sans Light',
+    textAlign: 'center',
   },
 });
 

@@ -141,10 +141,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       try {
         await remove(ref(database, `Tasks/${taskId}`));
         console.log("Task deleted successfully");
-        setRefresh(false);
-        setTimeout(() => {
-          setRefresh(prev => !prev);
-        }, 100); 
       } catch (error) {
         console.error("Error deleting task:", error);
       }
@@ -245,20 +241,21 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       <Text style={styles.plainText}>Pending Tasks</Text>
       <Image source={require('../../assets/vectors/arrow_right.png')} style={styles.plainIcon}/>
     </View>
-    <View style={{flex: 1, marginTop: 18.5, width: '100%', alignItems: 'flex-start'}}>
-    { refresh && 
-      <FlatList
-        data={[...tasks].reverse()}
-        horizontal
-        style={{ height: '100%' }}
-        showsHorizontalScrollIndicator={false}
-        ListHeaderComponent={<View style={{width:17}} />}
-        ListFooterComponent={<View style={{width:7}} />}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem} 
-        />
-    }
-    </View>
+    <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
+      <View style={{flex: 1, marginTop: 18.5, width: '100%', alignItems: 'flex-start'}}>
+      { refresh && 
+        <FlatList
+          data={[...tasks].reverse()}
+          horizontal
+          style={{ height: 450 }}
+          showsHorizontalScrollIndicator={false}
+          ListHeaderComponent={<View style={{width:17}} />}
+          ListFooterComponent={<View style={{width:7}} />}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem} 
+          />
+      }
+      </View>
       <View style={{width: '100%', height: '43', marginTop: 14.5,marginBottom: 85, paddingHorizontal: 17,flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
         <Text style={styles.addTaskText}>Add new tasks to your dashboard</Text>
         <TouchableOpacity style={styles.addTaskButton} onPress={() => handleAddTask(moment().format('YYYYMMDDHHmmss'))}>
@@ -271,6 +268,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
           </LinearGradient>
         </TouchableOpacity>
       </View>
+    </ScrollView>
       {
         (toEdit || toAdd) && (
         <View style={styles.blurView} >
@@ -417,7 +415,7 @@ const styles = StyleSheet.create({
   },
   cardView: {
     width: 249,
-    height: '98%',
+    height: 438,
     backgroundColor: '#FFFFFF',
     borderRadius: 25,
     marginRight: 10,
