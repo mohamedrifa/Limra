@@ -19,6 +19,9 @@
 		E69C46309D4C410988A8D07F /* Poppins.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6FDF308490CE46E183511A76 /* Poppins.ttf */; };
 		E3D8EB51AFAA4210BA2B6A47 /* Questrial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 31FF988AB1AC473DB7422588 /* Questrial.ttf */; };
 		4C136B1FE0054A92A90C6C0E /* Quantico.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 955890702EEC4B64A659D3F1 /* Quantico.ttf */; };
+		CC52511501234FD1AFDA884E /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76A660241FCD4BF9B8FD266B /* Poppins-Bold.ttf */; };
+		E07E7D91DAE448189837134B /* Quantico-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EFA7994A321C488DACEAFC7D /* Quantico-Bold.ttf */; };
+		214C60C386FF41F4AEBC7C81 /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 905D5E779F01446B960CBC4D /* Poppins-SemiBold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +58,9 @@
 		6FDF308490CE46E183511A76 /* Poppins.ttf */ = {isa = PBXFileReference; name = "Poppins.ttf"; path = "../App/assets/fonts/Poppins.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		31FF988AB1AC473DB7422588 /* Questrial.ttf */ = {isa = PBXFileReference; name = "Questrial.ttf"; path = "../App/assets/fonts/Questrial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		955890702EEC4B64A659D3F1 /* Quantico.ttf */ = {isa = PBXFileReference; name = "Quantico.ttf"; path = "../App/assets/fonts/Quantico.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		76A660241FCD4BF9B8FD266B /* Poppins-Bold.ttf */ = {isa = PBXFileReference; name = "Poppins-Bold.ttf"; path = "../App/assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EFA7994A321C488DACEAFC7D /* Quantico-Bold.ttf */ = {isa = PBXFileReference; name = "Quantico-Bold.ttf"; path = "../App/assets/fonts/Quantico-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		905D5E779F01446B960CBC4D /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; name = "Poppins-SemiBold.ttf"; path = "../App/assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +175,9 @@
 				6FDF308490CE46E183511A76 /* Poppins.ttf */,
 				31FF988AB1AC473DB7422588 /* Questrial.ttf */,
 				955890702EEC4B64A659D3F1 /* Quantico.ttf */,
+				76A660241FCD4BF9B8FD266B /* Poppins-Bold.ttf */,
+				EFA7994A321C488DACEAFC7D /* Quantico-Bold.ttf */,
+				905D5E779F01446B960CBC4D /* Poppins-SemiBold.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -274,6 +283,9 @@
 				E69C46309D4C410988A8D07F /* Poppins.ttf in Resources */,
 				E3D8EB51AFAA4210BA2B6A47 /* Questrial.ttf in Resources */,
 				4C136B1FE0054A92A90C6C0E /* Quantico.ttf in Resources */,
+				CC52511501234FD1AFDA884E /* Poppins-Bold.ttf in Resources */,
+				E07E7D91DAE448189837134B /* Quantico-Bold.ttf in Resources */,
+				214C60C386FF41F4AEBC7C81 /* Poppins-SemiBold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

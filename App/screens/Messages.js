@@ -1,13 +1,12 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, BackHandler, TouchableOpacity, Switch, Image, FlatList } from 'react-native';
 import { ref, onValue } from 'firebase/database';
 import LinearGradient from 'react-native-linear-gradient';
 import { database } from '../../firebase';
 import { Linking } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 
-
-const Messages = () => {
+export default function Messages({navigateToServiceAdd} ){
   const [customers, setCustomers] = useState([]);
   useEffect(() => {
     const customerRef = ref(database, 'ServiceList');
@@ -42,6 +41,15 @@ const Messages = () => {
     );
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+      const backAction = () => {
+        navigateToServiceAdd();
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+      return () => backHandler.remove();
+    }, [navigateToServiceAdd]);
   
 
 
@@ -120,9 +128,34 @@ const Messages = () => {
   const [toSend, setToSend] = useState(false);
   return(
   <View style={styles.container}>
+    <View style={styles.topBar}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 48, marginLeft: 17}}>
+        <TouchableOpacity
+        style={{
+          width: 35,
+          height: 35,
+          borderRadius: 100,
+          backgroundColor: '#C9ADA7',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onPress={navigateToServiceAdd}
+        >
+          <Image source={require('../assets/vectors/arrowBack.png')} style={{ width: 9, height: 18}}/>
+        </TouchableOpacity>
+        <Text
+        style={{
+          fontFamily: 'Poppins-SemiBold',
+          color: '#4A4E69',
+          fontSize: 16,
+          marginLeft: 14,
+        }}
+        >Group Message</Text>
+      </View>
+    </View>
     <Text style={styles.topText}>Connect With Customers</Text>
     <Text style={styles.secondText}>Message To All In One Place</Text>
-    <View style={{width: '100%', paddingHorizontal:18, marginTop: 19}}>
+    <View style={{width: '100%', paddingHorizontal:18, marginTop: 8}}>
       <View style={styles.searchView}>
         <TextInput 
         placeholder='search profiles' 
@@ -131,7 +164,7 @@ const Messages = () => {
         style={styles.searchBar} 
         placeholderTextColor={'#4A4E69'}/>
         <TouchableOpacity style={{width: 30, height: 30, alignSelf: 'center'}}>
-          <Image source={require('../assets/vectors/search.png')} style={{width: 30, height: 30, resizeMode: 'contain'}}/>
+          <Image source={require('../assets/vectors/search1.png')} style={{width: 30, height: 30, resizeMode: 'contain'}}/>
         </TouchableOpacity>
       </View>
     </View>
@@ -210,16 +243,25 @@ const Messages = () => {
               </View>
               <TextInput 
               style={styles.input} 
-              placeholder='Enter Your Message Here'
+              placeholder='Enter Message Here'
               scrollEnabled={true}
               value={message}
               onChangeText={setMessage}
               placeholderTextColor={'#4A4E69'}
               multiline={true}
               />
-              <View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between',alignItems: 'center', paddingHorizontal: 10,}}>
+              <Text
+              style={{
+                fontFamily: 'Poppins',
+                fontWeight: 400,
+                fontSize: 16,
+                color: '#9A8C98',
+                textDecorationLine: 'underline'
+              }}
+              >{selectedNumbers.length} profile selected</Text>
+              <View style={{width: 272, height: 43, flexDirection: 'row',justifyContent: 'space-between',alignItems: 'center', alignSelf: 'center', marginTop: 17}}>
                 <TouchableOpacity style={[styles.sendConfirmButton, {borderWidth: 1}]} onPress={()=>setToSend(false)}>
-                  <Text style={[styles.sendConfirmText, {color: '#22223B'}]}>Close</Text>
+                  <Text style={[styles.sendConfirmText, {color: '#22223B'}]}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.sendConfirmButton} onPress={()=> {sendWhatsAppMessage()}}>
                   <LinearGradient
@@ -245,26 +287,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#EBEEFF',
   },
+  topBar: {
+    width: '100%',
+    height: 97,
+    borderBottomColor: '#4A4E69',
+    borderBottomWidth: 1,
+  },
   topText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 24,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
     color: '#4A4E69',
-    marginTop: 43,
+    marginTop: 8,
   },
   secondText: {
     fontFamily: 'Poppins',
-    fontWeight: 300,
-    fontSize: 20,
+    fontWeight: 400,
+    fontSize: 14,
     color: '#4A4E69',
-    marginTop: 43,
-    marginTop: 5,
+    marginTop: 8,
   },
   searchView: {
     width: '100%',
     height: 43,
     borderRadius: 5,
-    borderWidth: 1,
+    borderWidth: 0.25,
     borderColor: '#22223B',
     paddingHorizontal: 10,
     flexDirection: 'row'
@@ -332,17 +378,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#00000099',
   },
   sendTaskContainer: {
-    width: '90%',
-    height: 300,
+    width: '100%',
+    height: 422,
     position: 'absolute',
-    bottom: 140,
     padding: 16,
     backgroundColor: '#EBEEFF',
     borderRadius: 5,
   },
   sendConfirmButton: {
-    width: '48%',
-    height: 42,
+    width: 100,
+    height: 43,
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
@@ -377,12 +422,12 @@ const styles = StyleSheet.create({
   },
   sendConfirmText: {
     fontFamily: 'Poppins',
-    fontSize: 16,
-    fontWeight: 300,
+    fontSize: 20,
+    fontWeight: 400,
   },
   input: {
     width: '100%',
-    height: '65%',
+    height: 247,
     borderColor: '#22223B',
     color: '#4A4E69',
     fontFamily: 'Poppins',
@@ -392,8 +437,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 19,
   },
 });
-
-export default Messages;

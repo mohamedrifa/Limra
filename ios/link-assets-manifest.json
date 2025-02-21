@@ -6,12 +6,24 @@
       "sha1": "ecdf1d58c0932a775c89b5ad48a7a0aaad66de4f"
     },
     {
+      "path": "App/assets/fonts/Poppins-Bold.ttf",
+      "sha1": "875cf0cecd647bcf22e79d633d868c1b1ec98dfa"
+    },
+    {
+      "path": "App/assets/fonts/Poppins-SemiBold.ttf",
+      "sha1": "8a4ace9392d06bcb7f8ea2f5169b07e4c383a90d"
+    },
+    {
       "path": "App/assets/fonts/Poppins.ttf",
       "sha1": "fdd3002e7d814ee47c1c1b8487c72c6bbb3a2d00"
     },
     {
       "path": "App/assets/fonts/Quando.ttf",
       "sha1": "49c29dfb50a813a2e688a3e49970d4a276238ae9"
+    },
+    {
+      "path": "App/assets/fonts/Quantico-Bold.ttf",
+      "sha1": "c934a2b9ef2f35c73ea4a749744562cc8d855238"
     },
     {
       "path": "App/assets/fonts/Quantico.ttf",

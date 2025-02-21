@@ -7,16 +7,19 @@ import Earnings from './screens/BottomScreens/Earnings';
 import Messages from './screens/Messages';
 import Settings from './screens/BottomScreens/Settings';
 import AddCustomer from './screens/AddCustomer';
+import CustomerHistory from './screens/customerHistory';
 
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
   const [addCustomerPage, setAddCustomerPage] = useState(false);
   const [customerId, setCustomerID] = useState("");
+  const [mobile, setMobile] = useState();
   const [toEdit, setToEdit] = useState(false);
   const [toAdd, setToAdd] = useState(false);
   const [changePass, setChangePass] = useState(false);
   const [terms, setTerms] = useState(false);
   const [messagesPage, setMessagesPage] = useState(false);
+  const [customerHisPage, setCustomerHisPage] = useState(false);
   
 
   useEffect(() => {
@@ -30,6 +33,9 @@ const ApplicationMain = () => {
       } else if (addCustomerPage) {
         setAddCustomerPage(false);
         return true;
+      } else if (customerHisPage) {
+        setCustomerHisPage(false);
+        return true;
       } else if (messagesPage) {
         setMessagesPage(false);
         return true;
@@ -42,7 +48,7 @@ const ApplicationMain = () => {
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [activePage, addCustomerPage, messagesPage, toAdd, toEdit]);
+  }, [activePage, addCustomerPage, messagesPage, toAdd, toEdit, customerHisPage]);
 
   useEffect(() => {
     if (activePage !== 'Dashboard') {
@@ -57,30 +63,40 @@ const ApplicationMain = () => {
 
 
   const renderPage = () => {
-    if (addCustomerPage) {
-      return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} customerId={customerId}/>;
-    }
-    if (messagesPage) {
-      return <Messages/>
-    }
-    switch (activePage) {
-      case 'Dashboard':
-        return <Dashboard toAdd={toAdd} toEdit={toEdit} sendToAdd={setToAdd} sendToEdit={setToEdit}/>;
-      case 'ServiceAdd':
-        return <ServiceAdd navigateToCustomerAdd={() => setAddCustomerPage(true)} navigateToMessages={() => setMessagesPage(true)} sendCustomerId={setCustomerID}/>;
-      case 'Earnings':
-        return <Earnings/>;
-      case 'Settings':
-        return <Settings changePass={changePass} terms={terms} sendToChange={setChangePass} sendTerms={setTerms}/>;
-      default:
-        return null;
-    }
-  };
+  if (addCustomerPage) {
+    return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} customerId={customerId}/>;
+  }
+  if (messagesPage) {
+    return <Messages navigateToServiceAdd={() => setMessagesPage(false)}/>;
+  }
+  if (customerHisPage) {
+    return <CustomerHistory mobile={mobile} navigateBack={() => setCustomerHisPage(false)} navigateToServiceAdd={() => setMessagesPage(false)}/>;
+  }
+  switch (activePage) {
+    case 'Dashboard':
+      return <Dashboard toAdd={toAdd} toEdit={toEdit} sendToAdd={setToAdd} sendToEdit={setToEdit}/>;
+    case 'ServiceAdd':
+      return <ServiceAdd 
+                navigateToCustomerAdd={() => setAddCustomerPage(true)} 
+                navigateToMessages={() => setMessagesPage(true)} 
+                sendCustomerId={setCustomerID}
+                navigateToHistory={() => setCustomerHisPage(true)}
+                sendMobile={setMobile}
+                />;
+    case 'Earnings':
+      return <Earnings/>;
+    case 'Settings':
+      return <Settings changePass={changePass} terms={terms} sendToChange={setChangePass} sendTerms={setTerms}/>;
+    default:
+      return null;
+  }
+};
+
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>{renderPage()}</View>
-      {!(addCustomerPage || messagesPage) && (
+      {!(addCustomerPage || messagesPage || customerHisPage) && (
         <LinearGradient colors={['#F9FBFFCF', '#F9FBFF']} style={styles.navContainer}>
           <TouchableOpacity onPress={() => setActivePage('Dashboard')} style={styles.navButton}>
             <Image

@@ -3,18 +3,19 @@ import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatL
 import {  ref, onValue, set, update, get, remove} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
-import { Picker } from '@react-native-picker/picker';
+import CustomPicker from '../../component/customPicker';
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
-  const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select Service', address: '' });
+  const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
   const [tasks, setTasks] = useState([]);
   const [tempTaskId, setTempTaskId] = useState(null); 
   const [overallTasks, setOverallTasks] = useState();
   const [completedTasks, setCompletedTasks] = useState();
   const [refresh, setRefresh] = useState(true);
+  const options = ["A.C", "Washing Machine", "Refrigerator", "Microwave Oven", "RO Water Purifier", "Water Heater", "Induction Stove", "Inverter/Battery"];
 
   useEffect(() => {
     const customerRef = ref(database, "Tasks");
@@ -42,7 +43,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
     const serviceTypeImage = (machine) => {
       switch(machine){
-        case "AC": return require('../../assets/images/Machines/AC.png');
+        case "A.C": return require('../../assets/images/Machines/AC.png');
         case "Washing Machine": return require('../../assets/images/Machines/Washing_Machine.png');
         case "Refrigerator": return require('../../assets/images/Machines/Refrigerator.png');
         case "Microwave Oven": return require('../../assets/images/Machines/Microwave.png');
@@ -85,7 +86,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         alert('Please Enter City');
         return;
       }
-      if (!customer.serviceType || customer.serviceType.trim() === 'Select Service') {
+      if (!customer.serviceType || customer.serviceType.trim() === 'Select type') {
         alert('choose a Service type');
         return;
       }  
@@ -292,29 +293,12 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
                   />
                 </TouchableOpacity>
               </View>
-              <TextInput style={styles.input} placeholder='City' placeholderTextColor={'#4A4E69'} value={customer.city} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
-              <View style={styles.input}>
-                <Picker
-                  selectedValue={customer.serviceType || 'Service type'}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
-                  dropdownIconColor={'#EBEEFF'}
-                >
-                  <Picker.Item label="A.C" value="AC" />
-                  <Picker.Item label="Washing Machine" value="Washing Machine" />
-                  <Picker.Item label="Refrigerator" value="Refrigerator" />
-                  <Picker.Item label="Microwave Oven" value="Microwave Oven" />
-                  <Picker.Item label="RO Water Purifier" value="RO Water Purifier" />
-                  <Picker.Item label="Water Heater" value="Water Heater" />
-                  <Picker.Item label="Induction Stove" value="Induction Stove" />
-                  <Picker.Item label="Inverter/Battery" value="Inverter/Battery" />
-                  <Picker.Item label="Other" value="Other" />
-                </Picker>
-                <TouchableOpacity style={styles.pickerCustomIcon}>
-                  <Text style={{paddingLeft: 9, color: '#4A4E69'}}>{customer.serviceType}</Text>
-                  <Image source={require('../../assets/vectors/pickerDownArrow.png')} style={{width: 15, height: 15, resizeMode: 'cover'}}/>
-                </TouchableOpacity>
-              </View>
+              <CustomPicker 
+                data={options} 
+                serviceType={customer.serviceType || "Service type"}
+                sendService={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
+              />
+              <TextInput style={[styles.input, {marginTop: 19}]} placeholder='City' placeholderTextColor={'#4A4E69'} value={customer.city} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
               <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} placeholderTextColor={'#4A4E69'} multiline={true} scrollEnabled={true} numberOfLines={4} placeholder='Address' value={customer.address} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
               <TouchableOpacity style={styles.addEditTaskButton} onPress={saveTask}>
                 <LinearGradient

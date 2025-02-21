@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, BackHandler, Alert, TouchableOpacity, Keyboard, TextInput, FlatList, ScrollView, Image } from 'react-native';
 import { getDatabase, ref, set, onValue } from "firebase/database";
-import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import BillGenerator from '../component/billGenerator';
+import CustomPicker from '../component/customPicker';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
-  const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select Service', address: '' });
+  const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
   const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
   const [billTotals, setBillTotals] = useState({ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'});
   
@@ -19,7 +19,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
 
   const db = getDatabase();
   const customerRef = ref(db, `/ServiceList/${customerId}`);
-
+  const options = ["A.C", "Washing Machine", "Refrigerator", "Microwave Oven", "RO Water Purifier", "Water Heater", "Induction Stove", "Inverter/Battery"];
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -115,7 +115,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
       alert('Please Enter City');
       return;
     }
-    if (!customer.serviceType || customer.serviceType.trim() === 'Select Service') {
+    if (!customer.serviceType || customer.serviceType.trim() === 'Select type') {
       alert('choose a Service type');
       return;
     }  
@@ -180,29 +180,12 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           </View>
           <Text style={styles.promtText}>City</Text>
           <TextInput style={styles.input} value={customer.city|| ''} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
-          <Text style={styles.promtText}>Service Type</Text>
-          <View style={styles.input}>
-            <Picker
-              selectedValue={customer.serviceType || 'Service type'}
-              onValueChange={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
-              style={styles.picker}
-              dropdownIconColor={'#EBEEFF'}
-            >
-              <Picker.Item label="A.C" value="AC" />
-              <Picker.Item label="Washing Machine" value="Washing Machine" />
-              <Picker.Item label="Refrigerator" value="Refrigerator" />
-              <Picker.Item label="Microwave Oven" value="Microwave Oven" />
-              <Picker.Item label="RO Water Purifier" value="RO Water Purifier" />
-              <Picker.Item label="Water Heater" value="Water Heater" />
-              <Picker.Item label="Induction Stove" value="Induction Stove" />
-              <Picker.Item label="Inverter/Battery" value="Inverter/Battery" />
-              <Picker.Item label="Other" value="Other" />
-            </Picker>
-            <TouchableOpacity style={styles.pickerCustomIcon}>
-              <Text style={{color: '#4A4E69'}}>{customer.serviceType}</Text>
-              <Image source={require('../assets/vectors/pickerDownArrow.png')} style={{width: 15, height: 15, resizeMode: 'cover'}}/>
-            </TouchableOpacity>
-          </View>
+          <Text style={[styles.promtText, {marginBottom: 10}]}>Service Type</Text>
+          <CustomPicker 
+            data={options} 
+            serviceType={customer.serviceType || "Service type"}
+            sendService={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
+          />
           <Text style={styles.promtText}>Address/Notes</Text>
           <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} multiline={true} scrollEnabled={true} numberOfLines={4} value={customer.address|| ''} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
           <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
@@ -359,6 +342,7 @@ const styles = StyleSheet.create({
   input: {
     height: 47,
     borderColor: '#22223B',
+    paddingHorizontal: 16,
     color: '#4A4E69',
     fontFamily: 'Poppins',
     fontWeight: 400,

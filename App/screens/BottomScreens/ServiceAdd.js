@@ -8,7 +8,7 @@ import { Linking } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
 
-export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, sendCustomerId}){
+export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, sendCustomerId, navigateToHistory, sendMobile}){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
@@ -45,6 +45,10 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const editCustomer = async (customerId) => {
     sendCustomerId(customerId);
     navigateToCustomerAdd();
+  };
+  const customerHistory = async (mobile) => {
+    sendMobile(mobile);
+    navigateToHistory();
   };
   const openWhatsApp = (mobileNumber) => {
     const number = mobileNumber || "9876543210";
@@ -230,22 +234,27 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
                           <Text style={styles.mobile}>{highlightText(item.mobile, searchQuery)}</Text>
                         </ScrollView>
                       </View>
-                      <View style={styles.listIcons}>
-                        <TouchableOpacity onPress={() => editCustomer(item.id)}>
-                          <Image source={require('../../assets/vectors/edit.png')} style={{width: 24, height: 24}} />
+                      <View style={{width: 101, height: 195, justifyContent: 'space-between'}}>
+                        <TouchableOpacity style={{alignSelf: 'flex-end'}} onPress={() => editCustomer(item.id)}>
+                          <Image source={require('../../assets/vectors/profileEdit.png')} style={{width: 24, height: 24}}/>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
-                          <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 24, height: 24}} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
-                          <Image source={require('../../assets/vectors/call.png')} style={{width: 24, height: 24}} />
+                        <View style={styles.listIcons}>
+                          <TouchableOpacity onPress={() => customerHistory(item.mobile)}>
+                            <Image source={require('../../assets/vectors/history.png')} style={{width: 27, height: 27}} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
+                            <Image source={require('../../assets/vectors/call.png')} style={{width: 27, height: 27}} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
+                            <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 27, height: 27}} />
+                          </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity style={styles.addToTask}  onPress={() => addToTask(item.id)}>
+                          <Text style={styles.addToTaskText}>Add To Task</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
                     <View style={styles.listLine}/>
-                    <TouchableOpacity style={styles.addToTask}  onPress={() => addToTask(item.id)}>
-                      <Text style={styles.addToTaskText}>Add To Task</Text>
-                    </TouchableOpacity>
                   </View>
                 );
               }
@@ -433,20 +442,16 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   listIcons: {
-    width: 92,
-    height: 24,
-    marginRight: 19,
+    width: 101,
+    height: 27,
     justifyContent: 'space-between',
     flexDirection: 'row',
   },
   addToTask: {
-    width: 92,
+    width: 101,
     height: 30,
-    position: 'absolute',
     borderRadius: 30,
     borderWidth: 1,
-    right: 19,
-    bottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderColor: '#22223B'
