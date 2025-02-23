@@ -92,7 +92,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const ogChange = (index, field, value) => {
     const updatedBillItems = [...billItems];
     updatedBillItems[index][field] = value;
-    updatedBillItems[index]['originalPrice'] = updatedBillItems[index]['total'];
+    if(updatedBillItems[index]['total']<0){
+      updatedBillItems[index]['originalPrice'] = 0.00;
+    } else {
+      updatedBillItems[index]['originalPrice'] = updatedBillItems[index]['total'];
+    }
     updatedBillItems[index]['commission'] = (updatedBillItems[index]['total'] - updatedBillItems[index]['originalPrice']).toFixed(2);
     setBillItems(updatedBillItems);
   };
@@ -233,7 +237,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={styles.inputText} keyboardType="numeric" value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
+                    <View style={styles.tableRate}><TextInput style={styles.inputText} value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableQty}><TextInput style={styles.inputText} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>

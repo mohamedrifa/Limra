@@ -122,8 +122,8 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       const isAddedToProfile = await get(ref(database, `Tasks/${taskId}/isAddedToProfile`));
       if (isAddedToProfile.val()) {
       update(ref(database, 'Tasks'), { completedTasks: completedTasks + 1 })
-              .then(() => console.log('Success'))
-              .catch(error => console.log(error));}
+        .then(() => console.log('Success'))
+        .catch(error => console.log(error));}
     };
 
     const deleteTask = async (taskId) => {
@@ -166,7 +166,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
           <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
             <ImageSlider  serviceType={item.serviceType}/>
             <View style={styles.listView}>
-              <ScrollView style={{height: '100%'}} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{height: '100%'}} nestedScrollEnabled={true} scrollEnabled={true} showsVerticalScrollIndicator={false}>
                 <Text style={styles.date}>{moment(item.date).format('DD-ddd').toUpperCase()}</Text>
                 <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.mobile}>{item.mobile}</Text>

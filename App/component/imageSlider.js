@@ -5,11 +5,11 @@ const SCREEN_WIDTH = 249;
 
 const ImageSlider = ({ serviceType }) => {
   const scrollViewRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(2);
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    const serviceImages = [];
+    let serviceImages = [];
     if (serviceType.includes("A.C")) {
       serviceImages.push(require("../assets/images/Machines/AC.jpg"));
     }
@@ -37,28 +37,40 @@ const ImageSlider = ({ serviceType }) => {
     if (serviceType.includes("Other")) {
       serviceImages.push(require("../assets/images/Machines/Others.jpg"));
     }
-    setImages(serviceImages);
-    setCurrentIndex(0); // Reset index when images change
+    const duplicatedImages = [
+      serviceImages[0],
+      ...serviceImages,
+      serviceImages[0],
+    ];
+
+    setImages(duplicatedImages);
+    setCurrentIndex(1);
+    setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ x: SCREEN_WIDTH, animated: false });
+    }, 100);
   }, [serviceType]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const nextIndex = currentIndex + 1;
-      if (nextIndex < images.length) {
-        scrollViewRef.current?.scrollTo({
-          x: nextIndex * SCREEN_WIDTH,
-          animated: true
-        });
+    if(serviceType.includes(",")){
+      const interval = setInterval(() => {
+        const nextIndex = currentIndex + 1;
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({
+            x: nextIndex * SCREEN_WIDTH,
+            animated: true,
+          });
+        }
         setCurrentIndex(nextIndex);
-      } else {
-        setTimeout(() => {
-          scrollViewRef.current?.scrollTo({ x: 0, animated: false });
-        }, 300); // Reset to first image without animation
-        setCurrentIndex(0);
-      }
-    }, 3000); // Auto-scroll every 3 seconds
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [currentIndex]);
+        if (nextIndex === images.length - 1) {
+          setTimeout(() => {
+            scrollViewRef.current?.scrollTo({ x: SCREEN_WIDTH, animated: false });
+            setCurrentIndex(1); 
+          }, 500); 
+        }
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [currentIndex, images, serviceType]);
 
   return (
     <View style={{ borderTopStartRadius: 25, borderTopEndRadius: 25, overflow: "hidden", height: 143 }}>
@@ -66,8 +78,7 @@ const ImageSlider = ({ serviceType }) => {
         ref={scrollViewRef}
         horizontal
         pagingEnabled
-        nestedScrollEnabled={false}
-        scrollEnabled={true}
+        scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         style={{ width: "100%" }}
       >
