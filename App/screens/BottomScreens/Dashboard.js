@@ -5,6 +5,7 @@ import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
 import CustomPicker from '../../component/customPicker';
 import moment from 'moment';
+import ImageSlider from '../../component/imageSlider';
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
@@ -41,19 +42,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     const [open, setOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
-    const serviceTypeImage = (machine) => {
-      switch(machine){
-        case "A.C": return require('../../assets/images/Machines/AC.png');
-        case "Washing Machine": return require('../../assets/images/Machines/Washing_Machine.png');
-        case "Refrigerator": return require('../../assets/images/Machines/Refrigerator.png');
-        case "Microwave Oven": return require('../../assets/images/Machines/Microwave.png');
-        case "RO Water Purifier": return require('../../assets/images/Machines/RO_Purifier.png');
-        case "Water Heater": return require('../../assets/images/Machines/Heater.png');
-        case "Induction Stove": return require('../../assets/images/Machines/Induction.png');
-        case "Inverter/Battery": return require('../../assets/images/Machines/Inverter.png');
-        case "Other": return require('../../assets/images/Machines/Others.png');
-      }
-    };
     const handleAddTask = (taskId) => {
       setTempTaskId(taskId);
       setCustomer({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select Service', address: '' });
@@ -171,11 +159,12 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         setTempTaskId(null);
       });
     };
+    
     const renderItem = ({ item, index}) => {
       if(item.id !== "overallTasks" && item.id !== "completedTasks"){
         return(
-      <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
-            <Image source={serviceTypeImage(item.serviceType)} style={styles.serviceTypeImage}/>
+          <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
+            <ImageSlider  serviceType={item.serviceType}/>
             <View style={styles.listView}>
               <ScrollView style={{height: '100%'}} showsVerticalScrollIndicator={false}>
                 <Text style={styles.date}>{moment(item.date).format('DD-ddd').toUpperCase()}</Text>

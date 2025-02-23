@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, Modal, FlatList, TouchableOpacity, StyleSheet, Image } from "react-native";
-import Immersive from 'react-native-immersive';
 
 const CustomPicker = ({ data, serviceType, sendService }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServices, setSelectedServices] = useState("");
 
   const addServices = (service) => {
+    setSelectedServices(serviceType);
     setSelectedServices((prevServices) => {
       let updatedServicesArray = prevServices ? prevServices.split(", ") : [];
       if (updatedServicesArray.includes(service)) {
