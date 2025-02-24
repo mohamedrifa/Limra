@@ -141,7 +141,7 @@ export default function Messages({navigateToServiceAdd} ){
         }}
         onPress={navigateToServiceAdd}
         >
-          <Image source={require('../assets/vectors/arrowBack.png')} style={{ width: 9, height: 18}}/>
+          <Image source={require('../assets/vectors/arrowBack.png')} style={{ width: 10, height: 18}}/>
         </TouchableOpacity>
         <Text
         style={{

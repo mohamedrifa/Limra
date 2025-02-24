@@ -70,7 +70,7 @@ const ApplicationMain = () => {
     return <Messages navigateToServiceAdd={() => setMessagesPage(false)}/>;
   }
   if (customerHisPage) {
-    return <CustomerHistory mobile={mobile} navigateBack={() => setCustomerHisPage(false)} navigateToServiceAdd={() => setMessagesPage(false)}/>;
+    return <CustomerHistory mobile={mobile} navigateToServiceAdd={() => setCustomerHisPage(false)}/>;
   }
   switch (activePage) {
     case 'Dashboard':
