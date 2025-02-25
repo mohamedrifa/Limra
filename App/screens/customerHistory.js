@@ -19,15 +19,18 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
             id: key,
             ...data[key],
           }));
-        setCustomers(filteredCustomers);
+          
+        {/*  new Date(b.date) - new Date(a.date)   for descending order*/}
+        const sortedCustomers = filteredCustomers.sort((a, b) => new Date(a.date) - new Date(b.date));
+        setCustomers(sortedCustomers);
       } else {
         setCustomers([]);
       }
     });
-
-    return () => unsubscribe(); 
-  }, []);
-  const prevMonth = useRef(null);
+  
+    return () => unsubscribe();
+  }, [mobile]); // Added `mobile` if it changes
+  
   
 
   useEffect(() => {
@@ -52,18 +55,18 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
           <Text style={styles.titleText}>CUSTOMER HISTORY</Text>
         </View>
       </LinearGradient>
-      {/*  new Date(b.date) - new Date(a.date)   for descending order*/}
       <FlatList
-        data={[...customers].sort((a, b) => new Date(a.date) - new Date(b.date))}
+        data={customers}
         style={{ width: '100%' }}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={<View style={{ height: 77 }} />}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => {
           const currentMonth = moment(item.date).format("MMMM YYYY");
+          const prevMonth = customers[index - 1];
           let showMonthHeader = false;
-          if (prevMonth.current !== currentMonth) {
-            prevMonth.current = currentMonth;
+
+          if ( index === 0 || moment(prevMonth.date).format("MMMM YYYY") !== currentMonth ) {
             showMonthHeader = true;
           }
           const nextItem = customers[index + 1];
@@ -87,8 +90,13 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
                     </View>
                     <Image source={require('../assets/vectors/pin.png')} style={{width: 13, height: 13, marginTop: 5}}/>
                   </View>
-                  <View style={styles.lineView}>
-                    <View style={styles.line}/>
+                  <View style={[styles.lineView, index === 0 && {flexDirection: 'column-reverse'}]}>
+                    <View 
+                    style={[
+                      customers.length !== 1 && styles.line,
+                      index === 0 && {flex: 0.5},
+                      index === customers.length - 1 && {flex: 0.5},
+                      ]}/>
                     <View 
                       style={[
                         styles.ovalMark2,
