@@ -129,6 +129,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     }
   };
 
+  const suggestions = ['9486635976', '9159454556', '8903677609'];
+  const filtered = suggestions.filter(item =>
+    item.toLowerCase().includes(customer.mobile.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -268,6 +273,18 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           </ScrollView>
         </View>
         <View style={{height: 80}}/>
+        {customer.mobile !== '' && (
+          <View style={{backgroundColor: 'white', position: 'absolute', top: 196, left: 20}}>
+          <FlatList
+            data={filtered}
+            renderItem={({ item }) => (
+              <TouchableOpacity >
+                <Text style={{fontFamily: 'Poppins', fontSize: 16, color: '#4A4E69'}}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          </View>
+        )}
       </ScrollView>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Image style={styles.submitImage} source={require('../assets/vectors/SaveButton.png')}/>

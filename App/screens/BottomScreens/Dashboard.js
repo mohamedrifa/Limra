@@ -130,7 +130,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       try {
         await remove(ref(database, `Tasks/${taskId}`));
         console.log("Task deleted successfully");
-        if(tempIndex === tasks.length-1){
+        if(tempIndex === tasks.length-1 || tempIndex === tasks.length-2){
           scrollToBottom();
         }
       } catch (error) {
