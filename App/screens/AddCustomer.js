@@ -21,21 +21,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const customerRef = ref(db, `/ServiceList/${customerId}`);
   const options = ["A.C", "Washing Machine", "Refrigerator", "Microwave Oven", "RO Water Purifier", "Water Heater", "Induction Stove", "Inverter/Battery"];
 
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
-      setKeyboardHeight(event.endCoordinates.height);
-    });
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
+  
 
   useEffect(() => {
     const backAction = () => {
@@ -144,7 +130,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   };
 
   return (
-    <View style={[styles.container, { marginBottom: keyboardHeight }]}>
+    <View style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.backButton} onPress={navigateToServiceAdd}>
           <View style={styles.backIcon}><Image source={require("../assets/vectors/arrowBack.png")} style={{ height:16,width:8}}/></View>

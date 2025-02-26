@@ -6,8 +6,6 @@ import ServiceAdd from './screens/BottomScreens/ServiceAdd';
 import Earnings from './screens/BottomScreens/Earnings';
 import Messages from './screens/Messages';
 import Settings from './screens/BottomScreens/Settings';
-import AddCustomer from './screens/AddCustomer';
-import CustomerHistory from './screens/customerHistory';
 
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
@@ -63,25 +61,21 @@ const ApplicationMain = () => {
 
 
   const renderPage = () => {
-  if (addCustomerPage) {
-    return <AddCustomer navigateToServiceAdd={() => setAddCustomerPage(false)} customerId={customerId}/>;
-  }
   if (messagesPage) {
     return <Messages navigateToServiceAdd={() => setMessagesPage(false)}/>;
-  }
-  if (customerHisPage) {
-    return <CustomerHistory mobile={mobile} navigateToServiceAdd={() => setCustomerHisPage(false)}/>;
   }
   switch (activePage) {
     case 'Dashboard':
       return <Dashboard toAdd={toAdd} toEdit={toEdit} sendToAdd={setToAdd} sendToEdit={setToEdit}/>;
     case 'ServiceAdd':
       return <ServiceAdd 
-                navigateToCustomerAdd={() => setAddCustomerPage(true)} 
+                navigateToCustomerAdd={setAddCustomerPage} 
+                AddCustomer={addCustomerPage}
+
                 navigateToMessages={() => setMessagesPage(true)} 
-                sendCustomerId={setCustomerID}
-                navigateToHistory={() => setCustomerHisPage(true)}
-                sendMobile={setMobile}
+                
+                navigateToHistory={setCustomerHisPage}
+                history={customerHisPage}
                 />;
     case 'Earnings':
       return <Earnings/>;

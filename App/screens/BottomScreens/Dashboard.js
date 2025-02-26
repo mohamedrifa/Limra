@@ -130,6 +130,9 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       try {
         await remove(ref(database, `Tasks/${taskId}`));
         console.log("Task deleted successfully");
+        if(tempIndex === tasks.length-1){
+          scrollToBottom();
+        }
       } catch (error) {
         console.error("Error deleting task:", error);
       }
@@ -158,6 +161,11 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         setTempIndex(null);
         setTempTaskId(null);
       });
+    };
+
+    const flatListRef = useRef(null);
+    const scrollToBottom = () => {
+      flatListRef.current?.scrollToEnd({ animated: true });
     };
     
     const renderItem = ({ item, index}) => {
@@ -235,6 +243,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       <View style={{flex: 1, marginTop: 18.5, width: '100%', alignItems: 'flex-start'}}>
       { refresh && 
         <FlatList
+          ref={flatListRef}
           data={[...tasks].reverse()}
           horizontal
           style={{ height: 450 }}
@@ -317,7 +326,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
               <TouchableOpacity style={[styles.delConfirmButton, {borderWidth: 1}]} onPress={()=>setToClose(false)}>
                 <Text style={[styles.delConfirmText, {color: '#22223B'}]}>No</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.delConfirmButton} onPress={()=> {moveItem()}}>
+              <TouchableOpacity style={styles.delConfirmButton} onPress={()=> {moveItem(tempIndex)}}>
                 <LinearGradient
                   colors={['#22223B', '#5D5DA1']}
                   style={styles.delConfirmButton}

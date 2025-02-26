@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Keyboard, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
@@ -7,11 +7,17 @@ import { database } from '../../../firebase';
 import { Linking } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DatePicker from 'react-native-date-picker';
+import AddProfile from '../AddCustomer'
+import CustomerHistory from '../customerHistory';
 
-export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, sendCustomerId, navigateToHistory, sendMobile}){
+export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, AddCustomer, navigateToHistory, history}){
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
+  const [customerId, setCustomerId] = useState("");
+  const [mobile, setMobile] = useState();
+
+
   const dates = Array.from({ length: 30 }, (_, i) =>
     moment().add(-i, 'days').format('YYYY-MM-DD')
   );
@@ -38,17 +44,38 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     );
     return () => unsubscribe(); 
   }, []);
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   const customerAdd = async () => {
-    sendCustomerId(moment().format('YYYYMMDDHHmmss'));
-    navigateToCustomerAdd();
+    setCustomerId(moment().format('YYYYMMDDHHmmss'));
+    navigateToCustomerAdd(true);
   };
-  const editCustomer = async (customerId) => {
-    sendCustomerId(customerId);
-    navigateToCustomerAdd();
+  const editCustomer = async (Id) => {
+    setCustomerId(Id);
+    navigateToCustomerAdd(true);
   };
   const customerHistory = async (mobile) => {
-    sendMobile(mobile);
-    navigateToHistory();
+    setMobile(mobile);
+    navigateToHistory(true);
+  };
+  const navigateBack = async () => {
+    setCustomerId("");
+    setMobile();
+    navigateToHistory(false);
+    navigateToCustomerAdd(false);
   };
   const openWhatsApp = (mobileNumber) => {
     const number = mobileNumber || "9876543210";
@@ -69,7 +96,6 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       Alert.alert("Error","Unable to open Dial Pad");
     }
   };
-
   const [searchActive, setSearchActive] = useState(false);
   const searchHandler = async () => {
     if(searchActive === false){
@@ -97,7 +123,6 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     }
     return text;
   };
-
   const addToTask = async (customerId) => {
     const db = getDatabase();
     const customerRef = ref(db, `/ServiceList/${customerId}`);
@@ -123,8 +148,9 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     }
   };
   
+  
   return (
-    <View style={{ flex: 1, backgroundColor: '#EBEEFF' }}>
+    <View style={{ flex: 1, backgroundColor: '#EBEEFF', marginBottom: keyboardHeight }}>
       <View style={styles.container}>
         <View style={styles.titleView}>
           { searchActive ? (
@@ -263,6 +289,16 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
           />
         </View>
       </View>
+      { AddCustomer && (
+        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
+          <AddProfile navigateToServiceAdd={() => navigateBack()} customerId={customerId}/>
+        </View>
+      )}
+      { history && (
+        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
+          <CustomerHistory mobile={mobile} navigateToServiceAdd={() => navigateBack()}/>;
+        </View>
+      )}
     </View>
   );
 };

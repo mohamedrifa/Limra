@@ -4,6 +4,7 @@ import { database } from '../../firebase';
 import moment from 'moment';
 import { View, Text, StyleSheet, BackHandler, TouchableOpacity, FlatList, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import AddCustomer from './AddCustomer';
 
 export default function CustomerHistory({mobile, navigateToServiceAdd}){
 
@@ -41,6 +42,19 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
       const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
       return () => backHandler.remove();
     }, [navigateToServiceAdd]);
+
+  const [addCustomerPage, setAddCustomerPage] = useState(false)
+  const [customerId, setCustomerId] = useState("");
+  const customerAdd = async (Id) => {
+    setCustomerId(Id);
+    setAddCustomerPage(true);
+  };
+  const navigateBack = async () => {
+    setCustomerId("");
+    setAddCustomerPage(false);
+  };
+
+  
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -59,7 +73,7 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
         data={customers}
         style={{ width: '100%' }}
         showsVerticalScrollIndicator={false}
-        ListFooterComponent={<View style={{ height: 77 }} />}
+        ListFooterComponent={<View style={{ height: 30 }} />}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => {
           const currentMonth = moment(item.date).format("MMMM YYYY");
@@ -82,7 +96,7 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
                     <Text style={[styles.monthHeader, {fontFamily: 'Quantico'}]}>{moment(item.date).format("YYYY")}</Text>
                   </View>
                 )}
-                <TouchableOpacity style={styles.listView}>
+                <TouchableOpacity style={styles.listView} onPress={() => customerAdd(item.id)}>
                   <View style={{width:78, height: 44, alignItems: 'center', justifyContent: 'center', marginTop: 10, marginBottom: 10}}>
                     <View style={{flexDirection: 'row'}}>
                       <Text style={[styles.listDate, {fontFamily: 'Quantico'}]}>{moment(item.date).format("DD ")}</Text>
@@ -109,6 +123,11 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
             </View>
           );
         }}/>
+      { addCustomerPage && (
+        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
+          <AddCustomer navigateToServiceAdd={() => navigateBack()} customerId={customerId}/>
+        </View>
+      )}
     </View>
   );
 };
