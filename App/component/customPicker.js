@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, Modal, FlatList, TouchableOpacity, StyleSheet, Image } from "react-native";
 
-const CustomPicker = ({ data, serviceType, sendService }) => {
+const CustomPicker = ({ data, serviceType, sendService, toCloseSuggestion }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServices, setSelectedServices] = useState("");
 
   const addServices = (service) => {
+    if(selectedServices === "Select Service" || selectedServices === "Select type")
     setSelectedServices(serviceType);
     setSelectedServices((prevServices) => {
       let updatedServicesArray = prevServices ? prevServices.split(", ") : [];
@@ -23,7 +24,7 @@ const CustomPicker = ({ data, serviceType, sendService }) => {
     <View>
       <TouchableOpacity 
         style={styles.pickerContainer} 
-        onPress={() => setModalVisible(true)}
+        onPress={() => {setModalVisible(true), toCloseSuggestion(false)}}
       >
         <Text style={styles.selectedText}>
           {selectedServices || serviceType}

@@ -48,8 +48,6 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     });
     return () => unsubscribe(); 
   }, [customerId]);
-  
-
   const handleAddRow = () => {
     const lastItem = billItems[billItems.length - 1];
     if (!lastItem.particulars.trim() && !lastItem.rate.trim() && !lastItem.originalPrice.trim()) {
@@ -88,6 +86,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   };
 
   const handleSubmit = () => {
+    setShowSuggestion(false);
     const db = getDatabase();
     if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
       alert('Please Enter All the Credentials');
@@ -129,10 +128,57 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     }
   };
 
-  const suggestions = ['9486635976', '9159454556', '8903677609'];
+  const [suggestions, setSuggestions] = useState([]);
+  useEffect(() => {
+    const customerRef = ref(db, 'ServiceList');
+    const unsubscribe = onValue(customerRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const mobileNumbers = Array.from(
+          new Set(
+            Object.keys(data)
+              .filter((key) => data[key]?.mobile)
+              .map((key) => data[key].mobile)
+          )
+        );
+  
+        setSuggestions(mobileNumbers);
+      } else {
+        setSuggestions([]);
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+  const [showSuggestion, setShowSuggestion] = useState(false);
   const filtered = suggestions.filter(item =>
     item.toLowerCase().includes(customer.mobile.toLowerCase())
   );
+  const selectedSuggestion = (mobileNo) => {
+    const customerRef = ref(db, 'ServiceList');
+    onValue(customerRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const customerData = Object.keys(data)
+          .map((key) => ({ id: key, ...data[key] }))
+          .find((item) => item.mobile === mobileNo); 
+        
+        if (customerData) {
+          customerData.id = customerId; // Assign a new unique ID
+          delete customerData.billItems;
+          delete customerData.billTotals;
+          setCustomer({
+            ...customerData,
+            date: moment().format('YYYY-MM-DD'), // Update date
+            serviceType: '', // Reset serviceType
+          });
+          setShowSuggestion(false);
+        }
+      }
+    }, { onlyOnce: true }); // Ensures it doesn't keep listening
+  };
+  
+
 
   return (
     <View style={styles.container}>
@@ -145,16 +191,16 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
       <ScrollView style = {styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={{width: '100%',marginTop: 15, alignSelf: 'center', paddingLeft: 16, paddingRight: 16}}>
           <Text style={styles.promtText} >Name</Text>
-          <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} />
+          <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} onFocus={()=>setShowSuggestion(false)}/>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText} >Mobile No.</Text>
-              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => setCustomer({ ...customer, mobile: text })} maxLength={10}/>
+              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}} maxLength={10}/>
             </View>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText}>Date</Text>
               <View style={[styles.input, {paddingLeft: 16, paddingRight: 16 }]}>
-                <TouchableOpacity onPress={() => setOpen(true)} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <TouchableOpacity onPress={() => {setOpen(true);setShowSuggestion(false);}} style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <Image source={require('../assets/vectors/calender.png')} style={{width: 16, height: 16, resizeMode: 'cover', alignSelf: 'center'}} />
                   <DatePicker
                     modal
@@ -174,15 +220,17 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
             </View>
           </View>
           <Text style={styles.promtText}>City</Text>
-          <TextInput style={styles.input} value={customer.city|| ''} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
+          <TextInput style={styles.input} value={customer.city|| ''} onFocus={()=>setShowSuggestion(false)} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
           <Text style={[styles.promtText, {marginBottom: 10}]}>Service Type</Text>
           <CustomPicker 
             data={options} 
+            onFocus={()=>setShowSuggestion(false)}
             serviceType={customer.serviceType || "Service type"}
             sendService={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
+            toCloseSuggestion={setShowSuggestion}
           />
           <Text style={styles.promtText}>Address/Notes</Text>
-          <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} multiline={true} scrollEnabled={true} numberOfLines={4} value={customer.address|| ''} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
+          <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} onFocus={()=>setShowSuggestion(false)} multiline={true} scrollEnabled={true} numberOfLines={4} value={customer.address|| ''} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
           <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
             <Text style={styles.promtText}>customer bill</Text>
             {isSaved&&(
@@ -226,15 +274,15 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableSNo}><Text style={styles.headerText}>{item.id}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
+                    <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} onFocus={()=>setShowSuggestion(false)} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={styles.inputText} value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
+                    <View style={styles.tableRate}><TextInput style={styles.inputText} onFocus={()=>setShowSuggestion(false)} value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableQty}><TextInput style={styles.inputText} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
+                    <View style={styles.tableQty}><TextInput style={styles.inputText} onFocus={()=>setShowSuggestion(false)} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
                     <View style={styles.tableVerticalLine1}/>
                     <View style={styles.tableTotal}><Text style={[styles.inputText,{width: '100%', textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
                     <View style={styles.tableVerticalLine1}/>
-                    <View style={[styles.tableOgPrice, {alignItems: 'flex-end'}]}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
+                    <View style={[styles.tableOgPrice, {alignItems: 'flex-end'}]}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onFocus={()=>setShowSuggestion(false)} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
                     <View style={styles.tableVerticalLine2}/>
                     <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
                     <View style={styles.tableVerticalLine2}/>
@@ -273,12 +321,12 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           </ScrollView>
         </View>
         <View style={{height: 80}}/>
-        {customer.mobile !== '' && (
-          <View style={{backgroundColor: 'white', position: 'absolute', top: 196, left: 20}}>
+        {(showSuggestion && customer.mobile !== '') && (
+          <View style={styles.suggestionBg}>
           <FlatList
             data={filtered}
             renderItem={({ item }) => (
-              <TouchableOpacity >
+              <TouchableOpacity style={{padding: 2, height: 30, borderTopColor: '#808080', borderTopWidth: 0.5}} onPress={()=>selectedSuggestion(item)}>
                 <Text style={{fontFamily: 'Poppins', fontSize: 16, color: '#4A4E69'}}>{item}</Text>
               </TouchableOpacity>
             )}
@@ -526,5 +574,18 @@ const styles = StyleSheet.create({
     height: 43,
     width: 100,
     resizeMode: 'contain',
+  },
+  suggestionBg: {
+    backgroundColor: 'white', 
+    position: 'absolute', 
+    top: 196, 
+    left: 20, 
+    opacity: 0.8,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4},
+    elevation: 4,
   },
 });

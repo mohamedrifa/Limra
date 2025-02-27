@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect}from 'react';
-import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler} from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler, TouchableWithoutFeedback} from 'react-native';
 import {  ref, onValue, set, update, get, remove} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
@@ -58,6 +58,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       }, { onlyOnce: true });
     };
     const saveTask = () => {
+      setShowSuggestion(false)
       if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
         alert('Please Enter All the Credentials');
         return;
@@ -137,8 +138,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         console.error("Error deleting task:", error);
       }
     };
-
-    
     const [animations, setAnimations] = useState([]);
     useEffect(() => {
       const newAnimations = tasks.map(() => new Animated.Value(0));
@@ -222,6 +221,57 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       setTempTaskId(taskId);
     };
 
+
+    const [suggestions, setSuggestions] = useState([]);
+    useEffect(() => {
+      const customerRef = ref(database, 'ServiceList');
+      const unsubscribe = onValue(customerRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const mobileNumbers = Array.from(
+            new Set(
+              Object.keys(data)
+                .filter((key) => data[key]?.mobile)
+                .map((key) => data[key].mobile)
+            )
+          );
+    
+          setSuggestions(mobileNumbers);
+        } else {
+          setSuggestions([]);
+        }
+      });
+    
+      return () => unsubscribe();
+    }, []);
+    const [showSuggestion, setShowSuggestion] = useState(false);
+    const filtered = suggestions.filter(item =>
+      item.toLowerCase().includes(customer.mobile.toLowerCase())
+    );
+    const selectedSuggestion = (mobileNo) => {
+      const customerRef = ref(database, 'ServiceList');
+      onValue(customerRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const customerData = Object.keys(data)
+            .map((key) => ({ id: key, ...data[key] }))
+            .find((item) => item.mobile === mobileNo); 
+          if (customerData) {
+            customerData.id = tempTaskId;
+            delete customerData.billItems;
+            delete customerData.billTotals;
+            setCustomer({
+              ...customerData,
+              isAddedToProfile: false,
+              date: moment().format('YYYY-MM-DD'), 
+              serviceType: '', 
+            });
+            setShowSuggestion(false);
+          }
+        }
+      }, { onlyOnce: true });
+    };
+
     return(
   <View style={styles.container}>
     <Text style = {styles.text}>Dashboard</Text>
@@ -271,11 +321,13 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       {
         (toEdit || toAdd) && (
         <View style={styles.blurView} >
-          <View style={styles.addTaskContainer}>
-              <TextInput style={styles.input} placeholder='Name' placeholderTextColor={'#4A4E69'} value={customer.name} onChangeText={(text) => setCustomer({ ...customer, name: text })}/>
+        <TouchableWithoutFeedback style={{flex: 1, position: 'absolute'}} onPress={() => {sendToAdd(false), sendToEdit(false)}}>
+          <View>
+            <View style={styles.addTaskContainer}>
+              <TextInput style={styles.input} placeholder='Name' placeholderTextColor={'#4A4E69'} value={customer.name} onFocus={()=>setShowSuggestion(false)} onChangeText={(text) => setCustomer({ ...customer, name: text })}/>
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' maxLength={10} placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => setCustomer({ ...customer, mobile: text })}/>
-                <TouchableOpacity onPress={() => setOpen(true)} style={[styles.input,{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 47}]}>
+                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' maxLength={10} placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}}/>
+                <TouchableOpacity onPress={() => {setOpen(true), setShowSuggestion(false)}} style={[styles.input,{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 47}]}>
                   <Image source={require('../../assets/vectors/calender.png')} style={{width: 25, height: 25, resizeMode: 'contain'}}/>
                   <DatePicker
                     modal
@@ -295,9 +347,10 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
                 data={options} 
                 serviceType={customer.serviceType || "Service type"}
                 sendService={(itemValue) => setCustomer({ ...customer, serviceType: itemValue })}
+                toCloseSuggestion={() => setShowSuggestion(false)}
               />
-              <TextInput style={[styles.input, {marginTop: 19}]} placeholder='City' placeholderTextColor={'#4A4E69'} value={customer.city} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
-              <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} placeholderTextColor={'#4A4E69'} multiline={true} scrollEnabled={true} numberOfLines={4} placeholder='Address' value={customer.address} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
+              <TextInput style={[styles.input, {marginTop: 19}]} onFocus={()=>setShowSuggestion(false)} placeholder='City' placeholderTextColor={'#4A4E69'} value={customer.city} onChangeText={(text) => setCustomer({ ...customer, city: text })}/>
+              <TextInput style={[styles.input, { height: 105, textAlignVertical: 'top' }]} onFocus={()=>setShowSuggestion(false)} placeholderTextColor={'#4A4E69'} multiline={true} scrollEnabled={true} numberOfLines={4} placeholder='Address' value={customer.address} onChangeText={(text) => setCustomer({ ...customer, address: text })}/>
               <TouchableOpacity style={styles.addEditTaskButton} onPress={saveTask}>
                 <LinearGradient
                   colors={['#22223B', '#5D5DA1']}
@@ -308,7 +361,21 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
                 </LinearGradient>
               </TouchableOpacity>
             </View>
+            {(showSuggestion && customer.mobile !== '') && (
+              <View style={styles.suggestionBg}>
+              <FlatList
+                data={filtered}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={{padding: 2, height: 30, borderTopColor: '#808080', borderTopWidth: 0.5}} onPress={()=>selectedSuggestion(item)}>
+                    <Text style={{fontFamily: 'Poppins', fontSize: 16, color: '#4A4E69'}}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              </View>
+            )}
           </View>
+          </TouchableWithoutFeedback>
+        </View>
         )
       }
       {
@@ -568,7 +635,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 43,
+    height: 50,
     borderColor: '#22223B',
     color: '#4A4E69',
     fontFamily: 'Poppins',
@@ -644,5 +711,18 @@ const styles = StyleSheet.create({
     fontWeight: 400,
     color: '#22223B',
     fontSize: 16,
+  },
+  suggestionBg: {
+    backgroundColor: 'white', 
+    position: 'absolute', 
+    top: 207, 
+    left: 30, 
+    opacity: 0.8,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4},
+    elevation: 4,
   },
 });
