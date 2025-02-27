@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   downBg: {
     width: '100%',
     height: width,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     alignItems: 'center',
     flexDirection: 'column-reverse'
   },

@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   navButton: {
-    width: 54,
     height: 50,
     justifyContent: 'center',
   },
