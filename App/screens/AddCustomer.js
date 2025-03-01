@@ -83,6 +83,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     }
     updatedBillItems[index]['commission'] = (updatedBillItems[index]['total'] - updatedBillItems[index]['originalPrice']).toFixed(2);
     setBillItems(updatedBillItems);
+    handleInputChange(index, field, value);
   };
 
   const handleSubmit = () => {
@@ -195,7 +196,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText} >Mobile No.</Text>
-              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}} maxLength={10}/>
+              <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}}/>
             </View>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText}>Date</Text>

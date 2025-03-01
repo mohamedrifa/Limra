@@ -116,7 +116,7 @@ const Earnings = () => {
                 <Text style={{ fontFamily: 'Quantico', fontSize: 14, fontWeight: '400', color: '#22223B' }}>{moment(date).format("D")}</Text>
               </View>
               <ScrollView 
-                style={{ height: 42, width: '100%' }}
+                style={{ height: 42, width: '80%' }}
                 scrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}>
@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
   },
   perDayContainer: {
     height: 23,
-    width: 65,
     position: 'absolute',
     justifyContent: 'space-between',
     flexDirection: 'row-reverse',
@@ -214,6 +213,7 @@ const styles = StyleSheet.create({
   perDayIcon: {
     width: 10,
     height: 10,
+    marginRight: 10,
     resizeMode: 'contain',
   },
   perDayText: {

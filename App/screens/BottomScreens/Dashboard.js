@@ -321,12 +321,11 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       {
         (toEdit || toAdd) && (
         <View style={styles.blurView} >
-        <TouchableWithoutFeedback style={{flex: 1, position: 'absolute'}} onPress={() => {sendToAdd(false), sendToEdit(false)}}>
           <View>
             <View style={styles.addTaskContainer}>
               <TextInput style={styles.input} placeholder='Name' placeholderTextColor={'#4A4E69'} value={customer.name} onFocus={()=>setShowSuggestion(false)} onChangeText={(text) => setCustomer({ ...customer, name: text })}/>
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' maxLength={10} placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}}/>
+                <TextInput style={[styles.input, {width: 222, height: 43}]} keyboardType="numeric" placeholder='Mobile No.' placeholderTextColor={'#4A4E69'} value={customer.mobile} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}}/>
                 <TouchableOpacity onPress={() => {setOpen(true), setShowSuggestion(false)}} style={[styles.input,{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 47}]}>
                   <Image source={require('../../assets/vectors/calender.png')} style={{width: 25, height: 25, resizeMode: 'contain'}}/>
                   <DatePicker
@@ -374,7 +373,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
               </View>
             )}
           </View>
-          </TouchableWithoutFeedback>
+        
         </View>
         )
       }
