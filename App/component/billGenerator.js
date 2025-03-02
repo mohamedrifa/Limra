@@ -90,7 +90,7 @@ const bill = (customerId, customer, billItems, billTotals) => {
       if (item.particulars.toLowerCase() === "discount"){
         return(
           `<tr>
-            <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #22223B;"><i>Discount</i></td>
+            <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #993333;">Discount</td>
             <td id="custom-total" style="text-align: right;">${item.total}</td>
           </tr>`
         )
@@ -128,10 +128,11 @@ const bill = (customerId, customer, billItems, billTotals) => {
               background: white;
           }
           .title {
-              width: 61px;
-              height: 13.13px;
-              display: flex;
-              margin: 14px auto;
+              width: 150px;
+              height: 32.28;
+              display:grid;
+              margin: -15px auto;
+              margin-top: 7.87px;
           }
           .invoiceText {
               font-family: 'Poppins';
@@ -261,36 +262,36 @@ const bill = (customerId, customer, billItems, billTotals) => {
           <div style="padding-left: 53px; padding-right: 52px;">
             <div style="display: flex; flex-direction: row; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 23px;">
                 <div class="customerDetails">
-                    <p style="font-size: 16px; margin-left: -20px; font-family: 'Poppins'; font-weight: 600; height: 16px;"><i>To</i></p>
-                    <p class="customerName"><i>${customer.name}</i></p>
-                    <p class="customerService"><i>${customer.serviceType}</i></p>
-                    <p class="customerMobile"><i>${customer.mobile}</i></p>
+                    <p style="font-size: 16px; margin-left: -20px; font-family: 'Poppins'; font-weight: 600; height: 16px;">To</p>
+                    <p class="customerName">${customer.name}</p>
+                    <p class="customerService">${customer.serviceType}</p>
+                    <p class="customerMobile">${customer.mobile}</p>
                 </div>
                 <div class="DateIdContainer">
-                    <p class="DateIdText"><i>Bill no : ${customerId}</i></p>
-                    <p class="DateIdText"><i>Date : ${customer.date}</i></p>
+                    <p class="DateIdText">Bill no : ${customerId}</p>
+                    <p class="DateIdText">Date : ${customer.date}</p>
                 </div>
             </div>
             <div style="height: 40px;"></div>
             <table class="table">
                 <thead>
                     <tr>
-                        <th><i>S.NO</i></th>
-                        <th><i>Particulars</i</th>
-                        <th><i>Rate</i></th>
-                        <th><i>Qty</i></th>
-                        <th><i>Total</i></th>
+                        <th>S.NO</th>
+                        <th>Particulars</th>
+                        <th>Rate</th>
+                        <th>Qty</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>${tableRow}</tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #22223B;"><i>Total</i></td>
+                        <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #22223B;">Total</td>
                         <td id="custom-total" style="text-align: right;">${billTotals.customTotal}</td>
                     </tr>
                 </tfoot>
             </table>
-            <p class="technicianName"><i>Shahathul Ameen</i></p>
+            <p class="technicianName">Shahathul Ameen</p>
           </div>
       </div>
   </body>
