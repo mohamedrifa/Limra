@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect}from 'react';
-import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput, BackHandler, TouchableWithoutFeedback} from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput } from 'react-native';
 import {  ref, onValue, set, update, get, remove} from 'firebase/database';
 import { database } from '../../../firebase';
 import DatePicker from 'react-native-date-picker';
 import CustomPicker from '../../component/customPicker';
+import TaskCard from '../../component/dashboard/TaskCard';
 import moment from 'moment';
-import ImageSlider from '../../component/imageSlider';
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
@@ -52,7 +52,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       const taskRef = ref(database, `Tasks/${taskId}`);
       onValue(taskRef, (snapshot) => {
         if (snapshot.exists()) {
-          setCustomer(snapshot.val()); // Populate input fields with task data
+          setCustomer(snapshot.val());
           sendToEdit(true);
         }
       }, { onlyOnce: true });
@@ -101,24 +101,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       });
       setTempTaskId(null);
     };
-    const addToProfile = (taskId) => {
-      const customerRef = ref(database, `/Tasks/${taskId}`);
-      onValue(customerRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const { isAddedToProfile, ...filteredData } = data;
-          filteredData.isAddedToProfile = true;
-          filteredData.date = moment().format('YYYY-MM-DD');
-          set(ref(database, `/ServiceList/${taskId}`), filteredData)
-            .then(() => console.log("Success Task Added"))
-            .catch((error) => console.error("Error: ", error.message));
-        }
-      }, { onlyOnce: true });
-      const taskRef = ref(database, `Tasks/${taskId}`);
-      update(taskRef, { isAddedToProfile: true })
-        .then(() => console.log("Status updated successfully"))
-        .catch((error) => console.error("Error updating status:", error));
-    };
     const topUpdate = async (taskId) => {
       const isAddedToProfile = await get(ref(database, `Tasks/${taskId}/isAddedToProfile`));
       if (isAddedToProfile.val()) {
@@ -128,17 +110,29 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     };
 
     const deleteTask = async (taskId) => {
+      const updatedTasks = tasks.filter(t => t.id !== taskId);
+      setTasks(updatedTasks);
+      const tasksObject = updatedTasks.reduce((acc, task) => {
+        const { id, ...rest } = task;
+        acc[id] = rest;
+        return acc;
+      }, {});
       try {
-        await remove(ref(database, `Tasks/${taskId}`));
-        console.log("Task deleted successfully");
-        if(tempIndex === tasks.length-1 || tempIndex === tasks.length-2){
-          scrollToBottom();
-        }
+        await set(ref(database, "Tasks"), {
+          ...tasksObject,
+          overallTasks,
+          completedTasks,
+        });
+
+        console.log("Task deleted & Tasks updated");
       } catch (error) {
-        console.error("Error deleting task:", error);
+        console.error("Delete failed:", error);
       }
     };
+
+    
     const [animations, setAnimations] = useState([]);
+
     useEffect(() => {
       const newAnimations = tasks.map(() => new Animated.Value(0));
       setAnimations(newAnimations);
@@ -167,53 +161,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
       flatListRef.current?.scrollToEnd({ animated: true });
     };
     
-    const renderItem = ({ item, index}) => {
-      if(item.id !== "overallTasks" && item.id !== "completedTasks"){
-        return(
-          <Animated.View style={[styles.cardView, { transform: [{ translateY: animations[index] ? animations[index] : new Animated.Value(0) }]}]}>
-            <ImageSlider  serviceType={item.serviceType}/>
-            <View style={styles.listView}>
-              <ScrollView style={{height: '100%'}} nestedScrollEnabled={true} scrollEnabled={true} showsVerticalScrollIndicator={false}>
-                <Text style={styles.date}>{moment(item.date).format('DD-ddd').toUpperCase()}</Text>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.mobile}>{item.mobile}</Text>
-                <Text style={styles.serviceType}>{item.serviceType}</Text>
-                <Text style={styles.city}>{item.city}</Text>
-                <Text style={styles.address}>{item.address}</Text>
-                <View style={{height:61}}/>
-              </ScrollView>
-              <TouchableOpacity style={styles.taskEdit} onPress={() => handleEditTask(item.id)}>
-                <Image source={require('../../assets/vectors/taskEdit.png')} style={{height: 35, width: 35, resizeMode: 'contain'}}/>
-              </TouchableOpacity>
-            </View>
-            <LinearGradient
-              colors={['#F8FAFFCF', '#F9FBFF']}
-              style={styles.cardButtonView}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}>
-              <TouchableOpacity style={styles.closeButton} onPress={() => delConfirmation(index, item.id)}>
-                <Text style={styles.buttonText1}>Close</Text>
-              </TouchableOpacity>
-              { !item.isAddedToProfile ? (
-                <TouchableOpacity style={styles.addToTaskButton} onPress={() => addToProfile(item.id)}>
-                  <Text style={styles.buttonText1}>Add to profile</Text>
-                </TouchableOpacity>
-                ) : (
-                <LinearGradient
-                  colors={['#5D5DA1', '#22223B']}
-                  style={[styles.addToTaskButton,{flexDirection: 'row'}]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}>
-                    <Image source={require('../../assets/vectors/tickWhite.png')} style={{width: 20, height: 20, resizeMode: 'contain', alignSelf: 'center'}}/>
-                    <Text style={styles.buttonText2}>Added</Text>
-                </LinearGradient>
-                )
-                }
-              </LinearGradient>
-            </Animated.View>)}
-        else
-                return null;
-    };
     const [toClose, setToClose] = useState(false);
     const delConfirmation = (index, taskId) => {
       setToClose(true);
@@ -301,8 +248,17 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
           ListHeaderComponent={<View style={{width:17}} />}
           ListFooterComponent={<View style={{width:7}} />}
           keyExtractor={(item) => item.id}
-          renderItem={renderItem} 
-          />
+          renderItem={({ item, index }) => (
+            <TaskCard
+              item={item}
+              index={index}
+              animation={animations[index]}
+              onEdit={handleEditTask}
+              onClose={delConfirmation}
+              onAddToProfile={() => {}}
+            />
+          )}
+        />  
       }
       </View>
       <View style={{width: '100%', height: '43', marginTop: 14.5,marginBottom: 85, paddingHorizontal: 17,flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -373,7 +329,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
               </View>
             )}
           </View>
-        
         </View>
         )
       }
@@ -461,131 +416,12 @@ const styles = StyleSheet.create({
     height: 25,
     resizeMode: 'contain',
   },
-  cardView: {
-    width: 249,
-    height: 438,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 25,
-    marginRight: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
   serviceTypeImage: {
     width: '100%',
     height: 143,
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
     resizeMode: 'cover',
-  },
-  listView: {
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    flex: 1,
-  },
-  date: {
-    fontFamily: 'Quantico-Bold',
-    fontSize: 20,
-    color: '#9A8C98'
-  },
-  name: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 20,
-    color: '#22223B',
-    marginTop: 15,
-  },
-  mobile: {
-    fontFamily: 'Quantico',
-    fontSize: 16,
-    fontWeight: 400,
-    color: '#22223B',
-    marginTop: 15,
-  },
-  serviceType: {
-    fontFamily: 'Poppins',
-    fontSize: 16,
-    fontWeight: 400,
-    color: '#22223B',
-    marginTop: 15,
-  },
-  city: {
-    fontFamily: 'Poppins',
-    fontSize: 16,
-    fontWeight: 400,
-    color: '#22223B',
-    marginTop: 15,
-  },
-  address: {
-    fontFamily: 'Poppins',
-    fontSize: 15,
-    fontWeight: 400,
-    color: '#22223B',
-    marginTop: 15,
-  },
-  cardButtonView: {
-    width: '100%',
-    height: 61,
-    position: 'absolute',
-    padding: 10,
-    bottom: 0,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    borderBottomRightRadius: 25,
-    borderBottomLeftRadius: 25,
-  },
-  closeButton: {
-    height: '100%',
-    width: 79,
-    borderColor: '#1C1E1E80',
-    backgroundColor: '#F9FBFF',
-    borderRadius: 30,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-    borderWidth: 0.5,
-  },
-  addToTaskButton: {
-    height: '100%',
-    width: 129,
-    backgroundColor: '#F9FBFF',
-    borderColor: '#1C1E1E80',
-    justifyContent: 'center',
-    borderRadius: 30,
-    borderWidth: 0.5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  buttonText1: {
-    width: '100%',
-    textAlign: 'center',
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 16,
-    color: '#22223B',
-  },
-  buttonText2: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    marginLeft: 10,
-    marginTop: 3,
-    alignSelf: 'center',
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  taskEdit: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
   },
   addTaskText: {
     width: 166,
