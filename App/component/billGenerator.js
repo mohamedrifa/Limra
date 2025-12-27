@@ -283,13 +283,13 @@ const bill = (customerId, customer, billItems, billTotals) => {
                         <th>Total</th>
                     </tr>
                 </thead>
-                <tbody>${tableRow}</tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #22223B;">Total</td>
-                        <td id="custom-total" style="text-align: right;">${billTotals.customTotal}</td>
-                    </tr>
-                </tfoot>
+                <tbody>
+                  ${tableRow}
+                  <tr>
+                    <td colspan="4" class="table" style="font-weight: 700; font-family: 'Poppins'; font-size: 14px; color: #22223B;">Total</td>
+                    <td id="custom-total" style="text-align: right;">${billTotals.customTotal}</td>
+                  </tr>
+                </tbody>
             </table>
             <p class="technicianName">Shahathul Ameen</p>
           </div>

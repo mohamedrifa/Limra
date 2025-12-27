@@ -7,9 +7,13 @@ import CustomPicker from '../../component/customPicker';
 import TaskCard from '../../component/dashboard/TaskCard';
 import moment from 'moment';
 import LinearGradient from 'react-native-linear-gradient';
+import { fetchTasks } from '../../utils/api';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
   const [tasks, setTasks] = useState([]);
   const [tempTaskId, setTempTaskId] = useState(null); 
@@ -19,28 +23,12 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
   const options = ["A.C", "Washing Machine", "Refrigerator", "Microwave Oven", "RO Water Purifier", "Water Heater", "Induction Stove", "Inverter/Battery"];
 
   useEffect(() => {
-    const customerRef = ref(database, "Tasks");
-    onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const { overallTasks, completedTasks, ...taskEntries } = data;
-        const customerList = Object.keys(taskEntries).map((key) => ({
-          id: key,
-          ...taskEntries[key],
-        }));
-        setTasks(customerList);
-        setOverallTasks(overallTasks || 0);
-        setCompletedTasks(completedTasks || 0);
-      } else {
-        setTasks([]);
-        setOverallTasks(0);
-        setCompletedTasks(completedTasks || 0);
-      }
+    fetchTasks().then(({ customerList, overallTasks, completedTasks }) => {
+      setTasks(customerList);
+      setOverallTasks(overallTasks);
+      setCompletedTasks(completedTasks);
     });
   }, []);
-    const [date, setDate] = useState(new Date());
-    const [open, setOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
     const handleAddTask = (taskId) => {
       setTempTaskId(taskId);
@@ -193,8 +181,12 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     }, []);
     const [showSuggestion, setShowSuggestion] = useState(false);
     const filtered = suggestions.filter(item =>
-      item.toLowerCase().includes(customer.mobile.toLowerCase())
+      item
+        ?.toString()
+        .toLowerCase()
+        .includes((customer.mobile ?? '').toString().toLowerCase())
     );
+
     const selectedSuggestion = (mobileNo) => {
       const customerRef = ref(database, 'ServiceList');
       onValue(customerRef, (snapshot) => {
