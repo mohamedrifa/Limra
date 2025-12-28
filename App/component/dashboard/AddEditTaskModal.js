@@ -4,9 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
+  Image,
   StyleSheet,
-  Image
+  FlatList,
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,10 +14,11 @@ import moment from 'moment';
 import CustomPicker from '../customPicker';
 
 export default function AddEditTaskModal({
+  toEdit,
+  toAdd,
   customer,
   setCustomer,
   options,
-  toEdit,
   saveTask,
   open,
   setOpen,
@@ -28,11 +29,12 @@ export default function AddEditTaskModal({
   filtered,
   selectedSuggestion,
 }) {
+  if (!(toEdit || toAdd)) return null;
+
   return (
     <View style={styles.blurView}>
       <View>
         <View style={styles.addTaskContainer}>
-          {/* Name */}
           <TextInput
             style={styles.input}
             placeholder="Name"
@@ -44,7 +46,6 @@ export default function AddEditTaskModal({
             }
           />
 
-          {/* Mobile + Date */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <TextInput
               style={[styles.input, { width: 222, height: 43 }]}
@@ -96,7 +97,6 @@ export default function AddEditTaskModal({
             </TouchableOpacity>
           </View>
 
-          {/* Service Type */}
           <CustomPicker
             data={options}
             serviceType={customer.serviceType || 'Service type'}
@@ -106,7 +106,6 @@ export default function AddEditTaskModal({
             toCloseSuggestion={() => setShowSuggestion(false)}
           />
 
-          {/* City */}
           <TextInput
             style={[styles.input, { marginTop: 19 }]}
             placeholder="City"
@@ -118,13 +117,15 @@ export default function AddEditTaskModal({
             }
           />
 
-          {/* Address */}
           <TextInput
-            style={[styles.input, { height: 105, textAlignVertical: 'top' }]}
-            placeholder="Address"
-            placeholderTextColor="#4A4E69"
+            style={[
+              styles.input,
+              { height: 105, textAlignVertical: 'top' },
+            ]}
             multiline
             numberOfLines={4}
+            placeholder="Address"
+            placeholderTextColor="#4A4E69"
             value={customer.address}
             onFocus={() => setShowSuggestion(false)}
             onChangeText={(text) =>
@@ -132,11 +133,15 @@ export default function AddEditTaskModal({
             }
           />
 
-          {/* Submit */}
-          <TouchableOpacity style={styles.addEditTaskButton} onPress={saveTask}>
+          <TouchableOpacity
+            style={styles.addEditTaskButton}
+            onPress={saveTask}
+          >
             <LinearGradient
               colors={['#22223B', '#5D5DA1']}
               style={styles.addEditTaskButton}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
             >
               <Text style={styles.addEditTaskText}>
                 {toEdit ? 'Edit Task' : 'Add Task'}
@@ -145,8 +150,7 @@ export default function AddEditTaskModal({
           </TouchableOpacity>
         </View>
 
-        {/* Suggestions */}
-        {showSuggestion && customer.mobile?.toString().length > 0 && (
+        {showSuggestion && customer.mobile !== '' && (
           <View style={styles.suggestionBg}>
             <FlatList
               data={filtered}
@@ -236,7 +240,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 207,
     left: 30,
-    opacity: 0.8,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     shadowColor: '#000',

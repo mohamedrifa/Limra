@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, BackHandler, Alert, TouchableOpacity, Keyboard,
 import { getDatabase, ref, set, onValue } from "firebase/database";
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
+import { Services } from '../constants/varConst';
 import BillGenerator from '../component/billGenerator';
 import CustomPicker from '../component/customPicker';
 
@@ -19,7 +20,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
 
   const db = getDatabase();
   const customerRef = ref(db, `/ServiceList/${customerId}`);
-  const options = ["A.C", "Washing Machine", "Refrigerator", "Microwave Oven", "RO Water Purifier", "Water Heater", "Induction Stove", "Inverter/Battery"];
+  const options = Services;
 
   
 
