@@ -5,11 +5,7 @@ import moment from 'moment';
 import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
 import { database } from '../../../firebase';
 import { Linking } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
 import ServiceCard from '../../component/services/ServiceCard';
-import DatePicker from 'react-native-date-picker';
-import AddProfile from '../AddCustomer'
-import CustomerHistory from '../customerHistory';
 import TopBar from '../../component/services/TopBar';
 import AddCustomerModal from '../../component/services/AddCustomerModal';
 import HistoryModal from '../../component/services/HistoryModal';
@@ -131,10 +127,10 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     const db = getDatabase();
     const customerRef = ref(db, `/ServiceList/${customerId}`);
     try {
-      const snapshot = await get(customerRef); // Fetch customer data once
+      const snapshot = await get(customerRef);
       if (!snapshot.exists()) return;
       const taskRef = ref(db, "Tasks/overallTasks");
-      const overallSnapshot = await get(taskRef); // Fetch overallTasks count once
+      const overallSnapshot = await get(taskRef);
       const overallTasks = overallSnapshot.exists() ? overallSnapshot.val() : 0;
       const { billItems, billTotals, ...filteredData } = snapshot.val();
       filteredData.isAddedToProfile = false;
