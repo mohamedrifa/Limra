@@ -6,7 +6,7 @@ import DeleteConfirmModal from '../../component/dashboard/DeleteConfirmModal';
 import moment from 'moment';
 import { Services } from '../../constants/varConst';
 import LinearGradient from 'react-native-linear-gradient';
-import { fetchTasks, fetchTaskById, saveTaskToDB, updateCompletedTasks, deleteTaskAtDB, MobileNumbersSuggest, fetchCustomerByMobile, addTaskToProfile } from '../../utils/api';
+import { fetchTasks, fetchTaskById, saveTaskToDB, updateCompletedTasks, deleteTaskAtDB, fetchCustomerByMobile, addTaskToProfile } from '../../api/taskApi';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
@@ -21,7 +21,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
   const [refresh, setRefresh] = useState(true);
   const [animations, setAnimations] = useState([]);
   const [toClose, setToClose] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
   const [showSuggestion, setShowSuggestion] = useState(false);
   const options = Services;
 
@@ -152,18 +151,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     setTempTaskId(taskId);
   };
 
-  useEffect(() => {
-    const unsubscribe = MobileNumbersSuggest(setSuggestions);
-    return () => unsubscribe();
-  }, []);
-
-  const filtered = suggestions.filter(item =>
-    item
-      ?.toString()
-      .toLowerCase()
-      .includes((customer.mobile ?? '').toString().toLowerCase())
-  );
-
   const selectedSuggestion = async (mobileNo) => {
     const customerData = await fetchCustomerByMobile(mobileNo, tempTaskId);
     if (customerData) {
@@ -250,7 +237,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         setDate={setDate}
         showSuggestion={showSuggestion}
         setShowSuggestion={setShowSuggestion}
-        filtered={filtered}
         selectedSuggestion={selectedSuggestion}
       />
       <DeleteConfirmModal

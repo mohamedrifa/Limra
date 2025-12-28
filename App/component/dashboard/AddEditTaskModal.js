@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  FlatList,
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 import CustomPicker from '../customPicker';
+import MobileSuggestion from '../mobileSuggestion';
 
 export default function AddEditTaskModal({
   toEdit,
@@ -26,7 +26,6 @@ export default function AddEditTaskModal({
   setDate,
   showSuggestion,
   setShowSuggestion,
-  filtered,
   selectedSuggestion,
 }) {
   if (!(toEdit || toAdd)) return null;
@@ -149,36 +148,10 @@ export default function AddEditTaskModal({
             </LinearGradient>
           </TouchableOpacity>
         </View>
-
-        {showSuggestion && customer.mobile !== '' && (
-          <View style={styles.suggestionBg}>
-            <FlatList
-              data={filtered}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={{
-                    padding: 2,
-                    height: 30,
-                    borderTopColor: '#808080',
-                    borderTopWidth: 0.5,
-                  }}
-                  onPress={() => selectedSuggestion(item)}
-                >
-                  <Text
-                    style={{
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: '#4A4E69',
-                    }}
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        )}
+        <MobileSuggestion 
+          visible={showSuggestion && customer.mobile !== ''}
+          customer={customer}
+          selectedSuggestion={(item)=>selectedSuggestion(item)}/>
       </View>
     </View>
   );
