@@ -5,10 +5,14 @@ import moment from 'moment';
 import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
 import { database } from '../../../firebase';
 import { Linking } from 'react-native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { TextInput } from 'react-native-gesture-handler';
+import ServiceCard from '../../component/services/ServiceCard';
 import DatePicker from 'react-native-date-picker';
 import AddProfile from '../AddCustomer'
 import CustomerHistory from '../customerHistory';
+import TopBar from '../../component/services/TopBar';
+import AddCustomerModal from '../../component/services/AddCustomerModal';
+import HistoryModal from '../../component/services/HistoryModal';
 
 export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, AddCustomer, navigateToHistory, history}){
   const [date, setDate] = useState(new Date());
@@ -152,69 +156,23 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF', marginBottom: keyboardHeight }}>
       <View style={styles.container}>
-        <View style={styles.titleView}>
-          { searchActive ? (
-              <View style={styles.searchView}>
-                <TouchableOpacity onPress={() => setSearchActive(false)}>
-                  <Image source={require('../../assets/vectors/arrowBack.png')} style={{width: 20, height: 20, resizeMode: 'contain'}} />
-                </TouchableOpacity>
-                <TextInput placeholder='     search profiles' style={styles.search} value={searchQuery} onChangeText={text => setSearchQuery(text)} placeholderTextColor={'#4A4E69'}/>
-              </View>
-            ): (
-              <Text style={styles.title}>
-                {selectedDate === moment().format('YYYY-MM-DD')
-                ? 'Today'
-                : selectedDate === moment().add(1, 'days').format('YYYY-MM-DD')
-                ? 'Tomarrow'
-                : selectedDate === moment().add(-1, 'days').format('YYYY-MM-DD')
-                ? 'Yesterday'
-                : moment(selectedDate).format('DD-MMM-YYYY')}
-              </Text> )}
-          <TouchableOpacity onPress={searchHandler} style={{position: 'absolute', right: 18, top: 7}}>
-            <Image source={require('../../assets/vectors/search.png')} style={{width: 30, height: 30}} />
-          </TouchableOpacity>
-        </View>
-        {!searchActive ? (
-            <View style={{ height: 55, width:'100%', flexDirection: 'row-reverse', paddingLeft: 16, paddingRight: 16}}>
-              <TouchableOpacity onPress={() => setOpen(true)} >
-                <Image source={require('../../assets/vectors/allDate.png')} style={styles.allDate} />
-                <DatePicker
-                  modal
-                  open={open}
-                  date={date}
-                  mode="date" // Can be 'date', 'time', or 'datetime'
-                  onConfirm={(selectedDate) => {
-                    setOpen(false);
-                    setDate(selectedDate);
-                    setSelectedDate(moment(selectedDate).format('YYYY-MM-DD'));
-                  }}
-                  onCancel={() => setOpen(false)}
-                />
-              </TouchableOpacity>
-              <FlatList
-                data={dates}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.dateFlat}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.dateItem} onPress={() => setSelectedDate(item)}>
-                    <Text style={[styles.dayText,moment(item).format('ddd')=== "Sun" && styles.sunday,]}>
-                      {moment(item).format('ddd').toUpperCase()}
-                    </Text>
-                    <Text style={styles.dateText}>
-                      {moment(item).format('DD')}
-                    </Text>
-                    <View  style={[selectedDate === item && styles.selectedDateLine]}/>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          ):null
-        }
+        <TopBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchHandler={searchHandler}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          searchActive={searchActive}
+          setSearchActive={setSearchActive}
+          dates={dates}
+          open={open}
+          setOpen={setOpen}
+          date={date}
+          setDate={setDate}
+        />
         <View style={styles.serviceListContainer}>
           <Text style={styles.noDataText}>No Entries</Text>
-          {!searchActive ? (
+          {!searchActive && (
             <View style={styles.addButtonContainer}>
             <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={customerAdd}>
               <LinearGradient
@@ -237,68 +195,40 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
               </LinearGradient>
             </TouchableOpacity>
           </View>
-          ): null
-          }
+          )}
           <FlatList
             data={searchActive ? filteredCustomers : customers}
             style={{ marginTop: 10 }}
             showsVerticalScrollIndicator={false}
             ListFooterComponent={<View style={{height: 77}} />}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              if(item.date === selectedDate || searchActive) {
-                return (
-                  <View style={styles.card}>
-                    <View style={styles.listLine}/>
-                    <View style={styles.listView}>
-                      <View style={styles.listDatas}>
-                        <ScrollView style={styles.listDatas} showsVerticalScrollIndicator={false}>
-                          <Text style={styles.name}>{highlightText(item.name, searchQuery)}</Text>
-                          <Text style={styles.city}>{highlightText(item.city, searchQuery)}</Text>
-                          <Text style={styles.address}>{highlightText(item.address, searchQuery)}</Text>
-                          <Text style={styles.machine}>{highlightText(item.serviceType, searchQuery)}</Text>
-                          <Text style={styles.mobile}>{highlightText(item.mobile, searchQuery)}</Text>
-                        </ScrollView>
-                      </View>
-                      <View style={{width: 101, height: 195, justifyContent: 'space-between'}}>
-                        <TouchableOpacity style={{alignSelf: 'flex-end'}} onPress={() => editCustomer(item.id)}>
-                          <Image source={require('../../assets/vectors/profileEdit.png')} style={{width: 24, height: 24}}/>
-                        </TouchableOpacity>
-                        <View style={styles.listIcons}>
-                          <TouchableOpacity onPress={() => customerHistory(item.mobile)}>
-                            <Image source={require('../../assets/vectors/history.png')} style={{width: 27, height: 27}} />
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => openDialPad(item.mobile)}>
-                            <Image source={require('../../assets/vectors/call.png')} style={{width: 27, height: 27}} />
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => openWhatsApp(item.mobile)}>
-                            <Image source={require('../../assets/vectors/whatsapp.png')} style={{width: 27, height: 27}} />
-                          </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity style={styles.addToTask}  onPress={() => addToTask(item.id)}>
-                          <Text style={styles.addToTaskText}>Add To Task</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    <View style={styles.listLine}/>
-                  </View>
-                );
-              }
-              return null;
-            }}
+            renderItem={({ item }) => (
+              <ServiceCard
+                item={item}
+                selectedDate={selectedDate}
+                searchActive={searchActive}
+                searchQuery={searchQuery}
+                highlightText={highlightText}
+                editCustomer={editCustomer}
+                customerHistory={customerHistory}
+                openDialPad={openDialPad}
+                openWhatsApp={openWhatsApp}
+                addToTask={addToTask}
+              />
+            )}
           />
         </View>
       </View>
-      { AddCustomer && (
-        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
-          <AddProfile navigateToServiceAdd={() => navigateBack()} customerId={customerId}/>
-        </View>
-      )}
-      { history && (
-        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
-          <CustomerHistory mobile={mobile} navigateToServiceAdd={() => navigateBack()}/>;
-        </View>
-      )}
+      <AddCustomerModal
+        visible={AddCustomer}
+        navigateBack={()=>navigateBack()}
+        customerId={customerId}
+      />
+      <HistoryModal
+        visible={history}
+        navigateBack={()=>navigateBack()}
+        mobile={mobile}
+      />
     </View>
   );
 };
@@ -412,11 +342,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: '#FFFFFF',
   },
-  listLine: {
-    width: '100%',
-    height: 0.5,
-    backgroundColor: '#22223B',
-  },
   noDataText: {
     fontFamily: 'Poppins',
     alignSelf: 'center',
@@ -426,77 +351,4 @@ const styles = StyleSheet.create({
     position: 'absolute',
     color: '#4A4E69'
   },
-  card: {
-    width: '100%',
-    height: 215,
-    backgroundColor: '#EBEEFF',
-    justifyContent: 'space-between',
-  },
-  listView: {
-    width: '100%',
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  listDatas: {
-    width: 214,
-    height: 195,
-  },
-  name: {
-    fontSize: 20,
-    color: '#22223B',
-    fontFamily: 'Poppins',
-    marginBottom: 10,
-    fontWeight: '400',
-  },
-  city: {
-    fontSize: 14,
-    color: '#22223B',
-    fontFamily: 'Poppins',
-    marginBottom: 10,
-    fontWeight: '400',
-  },
-  address: {
-    fontSize: 14,
-    color: '#22223B',
-    fontFamily: 'Poppins',
-    marginBottom: 10,
-    fontWeight: '400',
-  },
-  machine: {
-    fontSize: 14,
-    color: '#22223B',
-    fontFamily: 'Poppins',
-    marginBottom: 10,
-    fontWeight: '400',
-  },
-  mobile: {
-    fontSize: 14,
-    color: '#22223B',
-    fontFamily: 'Quantico',
-    fontWeight: '400',
-  },
-  listIcons: {
-    width: 101,
-    height: 27,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-  },
-  addToTask: {
-    width: 101,
-    height: 30,
-    borderRadius: 30,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: '#22223B'
-
-  },
-  addToTaskText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 12,
-    color: '#22223B',
-  }
 });

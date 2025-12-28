@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, BackHandler} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Dashboard from './screens/BottomScreens/Dashboard';
-import ServiceAdd from './screens/BottomScreens/ServiceAdd';
+import ServiceAdd from './screens/BottomScreens/Services';
 import Earnings from './screens/BottomScreens/Earnings';
 import Messages from './screens/Messages';
 import Settings from './screens/BottomScreens/Settings';
@@ -10,8 +10,6 @@ import Settings from './screens/BottomScreens/Settings';
 const ApplicationMain = () => {
   const [activePage, setActivePage] = useState('Dashboard');
   const [addCustomerPage, setAddCustomerPage] = useState(false);
-  const [customerId, setCustomerID] = useState("");
-  const [mobile, setMobile] = useState();
   const [toEdit, setToEdit] = useState(false);
   const [toAdd, setToAdd] = useState(false);
   const [changePass, setChangePass] = useState(false);

@@ -169,8 +169,8 @@ export const fetchCustomerByMobile = async (mobileNo, taskId) => {
 export const addTaskToProfile = async (item) => {
   try {
     const profileId = moment().format("YYYYMMDDHHmmss");
-
-    await set(ref(database, `ServiceList/${profileId}`), item);
+    const { id, ...payload } = item;
+    await set(ref(database, `ServiceList/${profileId}`), payload);
     await update(ref(database, `Tasks/${item.id}`), {
       isAddedToProfile: true,
     });
