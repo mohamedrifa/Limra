@@ -1,8 +1,17 @@
-import {  ref, onValue, set, update, get, remove} from 'firebase/database';
-import { database } from '../../firebase';
+import { ref, onValue, set, update, get } from "firebase/database";
+import { database } from "../../firebase";
 import moment from "moment";
+import { setCache, getCache } from "../utils/cache";
+
+/* ---------------- FETCH TASKS (REALTIME + CACHE) ---------------- */
 
 export const fetchTasks = (onUpdate) => {
+  getCache("TASKS_CACHE").then((cached) => {
+    if (cached) {
+      onUpdate(cached);
+    }
+  });
+
   const tasksRef = ref(database, "Tasks");
   const unsubscribe = onValue(tasksRef, (snapshot) => {
     const data = snapshot.val() || {};
@@ -12,26 +21,33 @@ export const fetchTasks = (onUpdate) => {
       ...taskEntries
     } = data;
     const customerList = Object.keys(taskEntries)
-      .filter(
-        (key) => taskEntries[key] && typeof taskEntries[key] === "object"
-      )
+      .filter((key) => typeof taskEntries[key] === "object")
       .map((key) => ({
         id: key,
         ...taskEntries[key],
       }));
-    onUpdate({ customerList, overallTasks, completedTasks });
+    const result = { customerList, overallTasks, completedTasks };
+    setCache("TASKS_CACHE", result);
+    onUpdate(result);
   });
   return unsubscribe;
 };
 
+/* ---------------- FETCH TASK BY ID ---------------- */
 
 export const fetchTaskById = async (taskId) => {
-  try {
-    const taskRef = ref(database, `Tasks/${taskId}`);
-    const snapshot = await get(taskRef);
+  const cacheKey = `TASK_${taskId}`;
 
+  // ⚡ Return cached task first
+  const cached = await getCache(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const snapshot = await get(ref(database, `Tasks/${taskId}`));
     if (snapshot.exists()) {
-      return snapshot.val();
+      const data = snapshot.val();
+      setCache(cacheKey, data);
+      return data;
     }
     return null;
   } catch (error) {
@@ -40,9 +56,15 @@ export const fetchTaskById = async (taskId) => {
   }
 };
 
+/* ---------------- SAVE TASK ---------------- */
+
 export const saveTaskToDB = async ({ taskId, customer, toAdd, overallTasks }) => {
   try {
     await set(ref(database, `Tasks/${taskId}`), customer);
+
+    // 💾 update cache
+    setCache(`TASK_${taskId}`, customer);
+
     if (toAdd) {
       await update(ref(database, "Tasks"), {
         overallTasks: overallTasks + 1,
@@ -56,12 +78,14 @@ export const saveTaskToDB = async ({ taskId, customer, toAdd, overallTasks }) =>
   }
 };
 
+/* ---------------- UPDATE COMPLETED TASKS ---------------- */
 
 export const updateCompletedTasks = async ({ taskId, completedTasks }) => {
   try {
     const snapshot = await get(
       ref(database, `Tasks/${taskId}/isAddedToProfile`)
     );
+
     if (snapshot.exists() && snapshot.val()) {
       await update(ref(database, "Tasks"), {
         completedTasks: completedTasks + 1,
@@ -76,59 +100,87 @@ export const updateCompletedTasks = async ({ taskId, completedTasks }) => {
   }
 };
 
+/* ---------------- DELETE TASK ---------------- */
 
-export const deleteTaskAtDB = async (tasksObject, overallTasks, completedTasks) => {
+export const deleteTaskAtDB = async (
+  tasksObject,
+  overallTasks,
+  completedTasks
+) => {
   try {
     await set(ref(database, "Tasks"), {
       ...tasksObject,
       overallTasks,
       completedTasks,
     });
-    console.log("Task deleted & Tasks updated");
+
+    // 💾 refresh cache
+    setCache("TASKS_CACHE", {
+      customerList: Object.values(tasksObject),
+      overallTasks,
+      completedTasks,
+    });
+
   } catch (error) {
     console.error("Delete failed:", error);
   }
-}
+};
+
+/* ---------------- FETCH CUSTOMER BY MOBILE ---------------- */
 
 export const fetchCustomerByMobile = async (mobileNo, taskId) => {
+  const cacheKey = `CUSTOMER_${mobileNo}`;
+
+  const cached = await getCache(cacheKey);
+  if (cached) return cached;
+
   try {
     const snapshot = await get(ref(database, "ServiceList"));
     const data = snapshot.val();
-
     if (!data) return null;
 
-    const customerData = Object.keys(data)
-      .map((key) => ({ id: key, ...data[key] }))
-      .find((item) => item.mobile === mobileNo);
+    const customerData = Object.values(data).find(
+      (item) => item.mobile === mobileNo
+    );
 
     if (!customerData) return null;
 
     delete customerData.billItems;
     delete customerData.billTotals;
 
-    return {
+    const result = {
       ...customerData,
       id: taskId,
       isAddedToProfile: false,
       date: moment().format("YYYY-MM-DD"),
       serviceType: "",
     };
+
+    setCache(cacheKey, result);
+    return result;
   } catch (error) {
     console.error("Fetch customer by mobile error:", error);
     return null;
   }
 };
 
+/* ---------------- ADD TASK TO PROFILE ---------------- */
 
 export const addTaskToProfile = async (item) => {
   try {
     const profileId = moment().format("YYYYMMDDHHmmss");
-    await set(ref(database, `ServiceList/${profileId}`), {
-      ...item,
-    });
+
+    await set(ref(database, `ServiceList/${profileId}`), item);
     await update(ref(database, `Tasks/${item.id}`), {
       isAddedToProfile: true,
     });
+
+    // 💾 update cached task
+    setCache(`TASK_${item.id}`, {
+      ...item,
+      isAddedToProfile: true,
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Add task to profile error:", error);
