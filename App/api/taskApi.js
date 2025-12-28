@@ -90,27 +90,6 @@ export const deleteTaskAtDB = async (tasksObject, overallTasks, completedTasks) 
   }
 }
 
-export const MobileNumbersSuggest = (setSuggestions) => {
-  const customerRef = ref(database, "ServiceList");
-  const unsubscribe = onValue(customerRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      const mobileNumbers = Array.from(
-        new Set(
-          Object.keys(data)
-            .filter((key) => data[key]?.mobile)
-            .map((key) => data[key].mobile)
-        )
-      );
-      setSuggestions(mobileNumbers);
-    } else {
-      setSuggestions([]);
-    }
-  });
-
-  return unsubscribe;
-};
-
 export const fetchCustomerByMobile = async (mobileNo, taskId) => {
   try {
     const snapshot = await get(ref(database, "ServiceList"));

@@ -238,6 +238,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         showSuggestion={showSuggestion}
         setShowSuggestion={setShowSuggestion}
         selectedSuggestion={selectedSuggestion}
+        closeModal={() =>{sendToAdd(false);sendToEdit(false);}}
       />
       <DeleteConfirmModal
         visible={toClose}

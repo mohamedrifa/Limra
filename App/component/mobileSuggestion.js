@@ -8,7 +8,7 @@ import {
   StyleSheet,
   FlatList,
 } from 'react-native';
-import { MobileNumbersSuggest } from "../api/taskApi";
+import { MobileNumbersSuggest } from "../api/serviceApi";
 
 export default function MobileSuggestion ({visible, customer, selectedSuggestion}) {
   if(!visible) return null;
