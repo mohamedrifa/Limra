@@ -2,13 +2,12 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Keyboard, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
-import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
-import { database } from '../../../firebase';
 import { Linking } from 'react-native';
 import ServiceCard from '../../component/services/ServiceCard';
 import TopBar from '../../component/services/TopBar';
 import AddCustomerModal from '../../component/services/AddCustomerModal';
 import HistoryModal from '../../component/services/HistoryModal';
+import { fetchServices, addToTask } from '../../api/serviceApi';
 
 export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, AddCustomer, navigateToHistory, history}){
   const [date, setDate] = useState(new Date());
@@ -22,30 +21,14 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     moment().add(-i, 'days').format('YYYY-MM-DD')
   );
   const [customers, setCustomers] = useState([]);
+
   useEffect(() => {
-    const customerRef = ref(database, 'ServiceList');
-    const unsubscribe = onValue(
-      customerRef,
-      (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const customerList = Object.keys(data).map((key) => ({
-            id: key, 
-            ...data[key], 
-          }));
-          setCustomers(customerList); 
-        } else {
-          setCustomers([]);
-        }
-      },
-      {
-        onlyOnce: false,
-      }
-    );
-    return () => unsubscribe(); 
+    const unsubscribe = fetchServices(setCustomers);
+    return () => unsubscribe();
   }, []);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
       setKeyboardHeight(event.endCoordinates.height);
@@ -123,31 +106,6 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     }
     return text;
   };
-  const addToTask = async (customerId) => {
-    const db = getDatabase();
-    const customerRef = ref(db, `/ServiceList/${customerId}`);
-    try {
-      const snapshot = await get(customerRef);
-      if (!snapshot.exists()) return;
-      const taskRef = ref(db, "Tasks/overallTasks");
-      const overallSnapshot = await get(taskRef);
-      const overallTasks = overallSnapshot.exists() ? overallSnapshot.val() : 0;
-      const { billItems, billTotals, ...filteredData } = snapshot.val();
-      filteredData.isAddedToProfile = false;
-      filteredData.date = moment().format('YYYY-MM-DD');
-      const autoId = moment().format('YYYYMMDDHHmmss')
-      await set(ref(db, `/Tasks/${autoId}`), filteredData);
-      const snapshot1 = await get(ref(db, `/Tasks/${autoId}`));
-      if (snapshot1.exists()) {
-        await update(ref(db, "Tasks"), { overallTasks: overallTasks + 1 });
-      }
-      Alert.alert("Success", "Task Added");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-      console.log(error);
-    }
-  };
-  
   
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF', marginBottom: keyboardHeight }}>
@@ -229,83 +187,8 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   );
 };
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#EBEEFF',
-    flex: 1,
-    alignItems: 'center',
-  },
-  titleView: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    width: '100%',
-    paddingHorizontal: 16,
-    marginTop: 25,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: 'Poppins',
-    color: '#4A4E69',
-    fontWeight: '400',
-  },
-  search: {
-    width: '85%',
-    color: '#4A4E69',
-  },
-  searchView: {
-    width: '100%',
-    height: 43,
-    flexDirection: 'row',
-    borderColor: '#22223B',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 5,
-  },
   highlight: {
     backgroundColor: '#F3FF00',
-  },
-  dateFlat: {
-    width: '100%',
-    height: 60,
-    alignContent: 'center',
-  },
-  dateItem: {
-    width: 'auto',
-    height: 55,
-    marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 5,
-  },
-  dateText: {
-    fontSize: 20,
-    color: '#4A4E69',
-    fontWeight: '400',
-    fontFamily: 'Quando',
-  },
-  dayText: {
-    fontSize: 13,
-    color: '#4A4E69',
-    fontFamily: 'Poppins',
-  },
-  sunday: {
-    color: '#E73D3D',
-  },
-  selectedDateLine: {
-    width: 20,
-    height: 5,
-    backgroundColor: '#22223B',
-    borderRadius: 8,
-  },
-  allDate: {
-    width: 32,
-    height: 55,
-    resizeMode: 'contain',
-  },
-  serviceListContainer: {
-    width: '100%',
-    flex: 1,
-    marginTop: 5,
   },
   addButtonContainer: {
     width: '100%',
