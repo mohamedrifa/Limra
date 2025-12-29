@@ -151,14 +151,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
     setTempTaskId(taskId);
   };
 
-  const selectedSuggestion = async (mobileNo) => {
-    const customerData = await fetchCustomerByMobile(mobileNo, tempTaskId);
-    if (customerData) {
-      setCustomer(customerData);
-      setShowSuggestion(false);
-    }
-  };
-
   const onAddToProfile = async (item) => {
     const res = await addTaskToProfile(item);
     if(res.success){
@@ -237,7 +229,6 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
         setDate={setDate}
         showSuggestion={showSuggestion}
         setShowSuggestion={setShowSuggestion}
-        selectedSuggestion={selectedSuggestion}
         closeModal={() =>{sendToAdd(false);sendToEdit(false);}}
       />
       <DeleteConfirmModal

@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  Image,
   StyleSheet,
   FlatList,
 } from 'react-native';
-import { MobileNumbersSuggest } from "../api/serviceApi";
+import { MobileNumbersSuggest, selectCustomerByMobile } from "../api/serviceApi";
 
-export default function MobileSuggestion ({visible, customer, selectedSuggestion}) {
-  if(!visible) return null;
+export default function MobileSuggestion({ visible, customer, setCustomer }) {
+  if (!visible) return null;
+
   const [suggestions, setSuggestions] = useState([]);
+
   useEffect(() => {
     const unsubscribe = MobileNumbersSuggest(setSuggestions);
     return () => unsubscribe();
@@ -20,10 +20,16 @@ export default function MobileSuggestion ({visible, customer, selectedSuggestion
 
   const filtered = suggestions.filter(item =>
     item
-      ?.toString()
-      .toLowerCase()
-      .includes((customer.mobile ?? '').toString().toLowerCase())
+      .toString()
+      .includes(customer.mobile ?? '')
   );
+
+  const selectedSuggestion = async (mobileNo) => {
+    const customerData = await selectCustomerByMobile(mobileNo);
+    if (!customerData) return;
+    setCustomer(customerData);
+  };
+
   return (
     <View style={styles.suggestionBg}>
       <FlatList
@@ -31,41 +37,37 @@ export default function MobileSuggestion ({visible, customer, selectedSuggestion
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={{
-              padding: 2,
-              height: 30,
-              borderTopColor: '#808080',
-              borderTopWidth: 0.5,
-            }}
+            style={styles.item}
             onPress={() => selectedSuggestion(item)}
           >
-            <Text
-              style={{
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                color: '#4A4E69',
-              }}
-            >
-              {item}
-            </Text>
+            <Text style={styles.text}>{item}</Text>
           </TouchableOpacity>
         )}
       />
-      </View>
-  )
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   suggestionBg: {
     backgroundColor: 'white',
-    position: 'absolute',
-    top: 207,
-    left: 30,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+    position: 'absolute',
     shadowColor: '#000',
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
+    zIndex: 10,
+  },
+  item: {
+    padding: 6,
+    borderTopWidth: 0.5,
+    borderTopColor: '#808080',
+  },
+  text: {
+    fontFamily: 'Poppins',
+    fontSize: 14,
+    color: '#4A4E69',
   },
 });

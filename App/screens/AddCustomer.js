@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, BackHandler, Alert, TouchableOpacity, Keyboard, TextInput, FlatList, ScrollView, Image } from 'react-native';
-import { getDatabase, ref, set, onValue } from "firebase/database";
+import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, FlatList, ScrollView, Image } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { Services } from '../constants/varConst';
 import BillGenerator from '../component/billGenerator';
 import MobileSuggestion from '../component/mobileSuggestion';
 import CustomPicker from '../component/customPicker';
-import { fetchServiceById } from "../api/serviceApi";
+import { fetchServiceById, saveCustomerService } from "../api/serviceApi";
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
@@ -19,11 +18,9 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-
-  const db = getDatabase();
-  const options = Services;
-
+  const [showSuggestion, setShowSuggestion] = useState(false);
   
+  const options = Services;
 
   useEffect(() => {
     const backAction = () => {
@@ -89,99 +86,16 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   };
 
   const handleSubmit = () => {
-    setShowSuggestion(false);
-    const db = getDatabase();
-    if (customer.name.trim() === '' && customer.mobile.trim() === '' && customer.city.trim() === '' &&customer.address.trim() === '') {
-      alert('Please Enter All the Credentials');
-      return;
-    };
-    if (!customer.name || customer.name.trim() === '') {
-      alert('Please Enter Name');
-      return;
-    };
-    if (!customer.mobile || customer.mobile.trim() === '') {
-      alert('Please Enter Mobile No');
-      return;
-    }
-    if (!customer.city || customer.city.trim() === '') {
-      alert('Please Enter City');
-      return;
-    }
-    if (!customer.serviceType || customer.serviceType.trim() === 'Select type') {
-      alert('choose a Service type');
-      return;
-    }  
-    if (!customer.address || customer.address.trim() === '') {
-      alert('Please Enter Address/Notes');
-      return;
-    }    
-    const lastItem = billItems[billItems.length - 1];
-    if (!lastItem.particulars.trim() && !lastItem.rate.trim() && !lastItem.originalPrice.trim()) {
-      setBillItems(billItems.slice(0, -1));
-    }
-    if(billItems[0].particulars.trim() === '' && billItems[0].rate.trim() === '' &&billItems[0].originalPrice.trim() === ''){
-      set(ref(db, `/ServiceList/${customerId}`), { ...customer})
-      .then(() => [alert('Success: Customer details saved!'), Keyboard.dismiss()])
-      .catch((error) => alert(`Error: ${error.message}`));
-    }
-    else {
-      set(ref(db, `/ServiceList/${customerId}`), { ...customer, billItems, billTotals })
-      .then(() => [Alert.alert('Success','Customer details saved!'),setIsSaved(true), Keyboard.dismiss()])
-      .catch((error) => alert(`Error: ${error.message}`));
-    }
-  };
-
-  const [suggestions, setSuggestions] = useState([]);
-  useEffect(() => {
-    const customerRef = ref(db, 'ServiceList');
-    const unsubscribe = onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const mobileNumbers = Array.from(
-          new Set(
-            Object.keys(data)
-              .filter((key) => data[key]?.mobile)
-              .map((key) => data[key].mobile)
-          )
-        );
-  
-        setSuggestions(mobileNumbers);
-      } else {
-        setSuggestions([]);
-      }
+    saveCustomerService({
+      customer,
+      customerId,
+      billItems,
+      billTotals,
+      setBillItems,
+      setIsSaved,
+      setShowSuggestion,
     });
-  
-    return () => unsubscribe();
-  }, []);
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  const filtered = suggestions.filter(item =>
-    item.toLowerCase().includes(customer.mobile.toLowerCase())
-  );
-  const selectedSuggestion = (mobileNo) => {
-    const customerRef = ref(db, 'ServiceList');
-    onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const customerData = Object.keys(data)
-          .map((key) => ({ id: key, ...data[key] }))
-          .find((item) => item.mobile === mobileNo); 
-        
-        if (customerData) {
-          customerData.id = customerId; // Assign a new unique ID
-          delete customerData.billItems;
-          delete customerData.billTotals;
-          setCustomer({
-            ...customerData,
-            date: moment().format('YYYY-MM-DD'), // Update date
-            serviceType: '', // Reset serviceType
-          });
-          setShowSuggestion(false);
-        }
-      }
-    }, { onlyOnce: true }); // Ensures it doesn't keep listening
   };
-  
-
 
   return (
     <View style={styles.container}>
@@ -199,6 +113,13 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
             <View style={{width: '48%'}}>
               <Text style={styles.promtText} >Mobile No.</Text>
               <TextInput style={styles.input} keyboardType="numeric" value={customer.mobile|| ''} onChangeText={(text) => {setCustomer({ ...customer, mobile: text }), setShowSuggestion(true)}}/>
+              <View>
+                <MobileSuggestion
+                  visible={showSuggestion && customer.mobile !== ''}
+                  customer={customer}
+                  setCustomer={(item)=>{setCustomer(item); setShowSuggestion(false);}}
+                />
+              </View>
             </View>
             <View style={{width: '48%'}}>
               <Text style={styles.promtText}>Date</Text>
@@ -324,11 +245,6 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           </ScrollView>
         </View>
         <View style={{height: 80}}/>
-        <MobileSuggestion
-          visible={showSuggestion && customer.mobile !== ''}
-          customer={customer}
-          selectedSuggestion={(item) => selectedSuggestion(item)}
-        />
       </ScrollView>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Image style={styles.submitImage} source={require('../assets/vectors/SaveButton.png')}/>

@@ -27,7 +27,6 @@ export default function AddEditTaskModal({
   setDate,
   showSuggestion,
   setShowSuggestion,
-  selectedSuggestion,
   closeModal, // 🔹 passed from parent
 }) {
   if (!(toEdit || toAdd)) return null;
@@ -46,7 +45,7 @@ export default function AddEditTaskModal({
         <View>
           <View style={styles.addTaskContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {marginTop: 0}]}
               placeholder="Name"
               placeholderTextColor="#4A4E69"
               value={customer.name}
@@ -56,19 +55,27 @@ export default function AddEditTaskModal({
               }
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <TextInput
-                style={[styles.input, { width: 222, height: 43 }]}
-                keyboardType="numeric"
-                placeholder="Mobile No."
-                placeholderTextColor="#4A4E69"
-                value={customer.mobile}
-                onChangeText={(text) => {
-                  setCustomer({ ...customer, mobile: text });
-                  setShowSuggestion(true);
-                }}
-              />
-
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 19 }}>
+              <View>
+                <TextInput
+                  style={[styles.input, { width: 222 }]}
+                  keyboardType="numeric"
+                  placeholder="Mobile No."
+                  placeholderTextColor="#4A4E69"
+                  value={customer.mobile}
+                  onChangeText={(text) => {
+                    setCustomer({ ...customer, mobile: text });
+                    setShowSuggestion(true);
+                  }}
+                />
+                <View>
+                  <MobileSuggestion
+                    visible={showSuggestion && customer.mobile !== ''}
+                    customer={customer}
+                    setCustomer={(item)=>{setCustomer(item); setShowSuggestion(false);}}
+                  />
+                </View>
+              </View>
               <TouchableOpacity
                 onPress={() => {
                   setOpen(true);
@@ -159,12 +166,6 @@ export default function AddEditTaskModal({
               </LinearGradient>
             </TouchableOpacity>
           </View>
-
-          <MobileSuggestion
-            visible={showSuggestion && customer.mobile !== ''}
-            customer={customer}
-            selectedSuggestion={(item) => selectedSuggestion(item)}
-          />
         </View>
       </Pressable>
     </Pressable>
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 19,
+    marginTop: 19,
   },
   addEditTaskButton: {
     width: 126,
@@ -212,6 +213,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
+    marginTop: 19,
     elevation: 4,
   },
   addEditTaskText: {

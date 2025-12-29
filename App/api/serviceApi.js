@@ -1,7 +1,37 @@
 import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
 import { database } from '../../firebase';
 import moment from 'moment';
-import { Alert } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
+
+export const selectCustomerByMobile = (mobileNo) =>
+  new Promise((resolve, reject) => {
+    const customerRef = ref(database, 'ServiceList');
+    onValue(
+      customerRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return resolve(null);
+
+        const customerData = Object.keys(data)
+          .map((key) => ({ id: key, ...data[key] }))
+          .find((item) => item.mobile === mobileNo);
+
+        if (!customerData) return resolve(null);
+
+        delete customerData.billItems;
+        delete customerData.isAddedToProfile;
+        delete customerData.billTotals;
+
+        resolve({
+          ...customerData,
+          date: moment().format('YYYY-MM-DD'),
+          serviceType: '',
+        });
+      },
+      reject,
+      { onlyOnce: true }
+    );
+  });
 
 export const MobileNumbersSuggest = (setSuggestions) => {
   const customerRef = ref(database, "ServiceList");
@@ -79,4 +109,54 @@ export const fetchServiceById = (customerId, callback) => {
     callback(snapshot.val());
   });
   return unsubscribe;
+};
+
+export const saveCustomerService = ({
+  customer,
+  customerId,
+  billItems,
+  billTotals,
+  setBillItems,
+  setIsSaved,
+  setShowSuggestion,
+}) => {
+  setShowSuggestion(false);
+  if (
+    !customer.name?.trim() &&
+    !customer.mobile?.trim() &&
+    !customer.city?.trim() &&
+    !customer.address?.trim()
+  ) {
+    alert('Please Enter All the Credentials');
+    return;
+  }
+  if (!customer.name?.trim()) return alert('Please Enter Name');
+  if (!customer.mobile?.trim()) return alert('Please Enter Mobile No');
+  if (!customer.city?.trim()) return alert('Please Enter City');
+  if (!customer.serviceType || customer.serviceType === 'Select type')
+    return alert('choose a Service type');
+  if (!customer.address?.trim()) return alert('Please Enter Address/Notes');
+  const lastItem = billItems[billItems.length - 1];
+  if (
+    !lastItem.particulars?.trim() &&
+    !lastItem.rate?.trim() &&
+    !lastItem.originalPrice?.trim()
+  ) {
+    billItems = billItems.slice(0, -1);
+    setBillItems(billItems);
+  }
+  const isBillEmpty =
+    !billItems[0]?.particulars?.trim() &&
+    !billItems[0]?.rate?.trim() &&
+    !billItems[0]?.originalPrice?.trim();
+  const payload = isBillEmpty
+    ? { ...customer }
+    : { ...customer, billItems, billTotals };
+  set(ref(database, `/ServiceList/${customerId}`), payload)
+    .then(() => {
+      Alert.alert('Success', 'Customer details saved!');
+      setIsSaved(true);
+      Keyboard.dismiss();
+    })
+    .catch((error) => alert(`Error: ${error.message}`));
 };
