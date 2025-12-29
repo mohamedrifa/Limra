@@ -5,7 +5,9 @@ import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { Services } from '../constants/varConst';
 import BillGenerator from '../component/billGenerator';
+import MobileSuggestion from '../component/mobileSuggestion';
 import CustomPicker from '../component/customPicker';
+import { fetchServiceById } from "../api/serviceApi";
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
@@ -19,7 +21,6 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
 
   const db = getDatabase();
-  const customerRef = ref(db, `/ServiceList/${customerId}`);
   const options = Services;
 
   
@@ -32,23 +33,23 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
   }, [navigateToServiceAdd]);
+
   useEffect(() => {
     if (!customerId) return;
-    const unsubscribe = onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setCustomer(data);
-        if (data.billItems) {
-          setBillItems(data.billItems);
-          setIsSaved(true);
-        }
-        if (data.billTotals) {
-          setBillTotals(data.billTotals);
-        }
+    const unsubscribe = fetchServiceById(customerId, (data) => {
+      if (!data) return;
+      setCustomer(data);
+      if (data.billItems) {
+        setBillItems(data.billItems);
+        setIsSaved(true);
+      }
+      if (data.billTotals) {
+        setBillTotals(data.billTotals);
       }
     });
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, [customerId]);
+
   const handleAddRow = () => {
     const lastItem = billItems[billItems.length - 1];
     if (!lastItem.particulars.trim() && !lastItem.rate.trim() && !lastItem.originalPrice.trim()) {
@@ -323,18 +324,11 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           </ScrollView>
         </View>
         <View style={{height: 80}}/>
-        {(showSuggestion && customer.mobile !== '') && (
-          <View style={styles.suggestionBg}>
-          <FlatList
-            data={filtered}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={{padding: 2, height: 30, borderTopColor: '#808080', borderTopWidth: 0.5}} onPress={()=>selectedSuggestion(item)}>
-                <Text style={{fontFamily: 'Poppins', fontSize: 16, color: '#4A4E69'}}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-          </View>
-        )}
+        <MobileSuggestion
+          visible={showSuggestion && customer.mobile !== ''}
+          customer={customer}
+          selectedSuggestion={(item) => selectedSuggestion(item)}
+        />
       </ScrollView>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Image style={styles.submitImage} source={require('../assets/vectors/SaveButton.png')}/>

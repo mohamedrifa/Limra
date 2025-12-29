@@ -71,3 +71,12 @@ export const addToTask = async (customerId) => {
     console.log(error);
   }
 };
+
+export const fetchServiceById = (customerId, callback) => {
+  if (!customerId) return () => {};
+  const customerRef = ref(database, `/ServiceList/${customerId}`);
+  const unsubscribe = onValue(customerRef, (snapshot) => {
+    callback(snapshot.val());
+  });
+  return unsubscribe;
+};
