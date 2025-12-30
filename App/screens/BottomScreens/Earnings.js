@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
-import { ref, onValue } from 'firebase/database';
-import { database } from '../../../firebase';
 import moment from 'moment';
+import { fetchServiceList } from '../../api/serviceApi';
 
 const generateDates = (month) => {
   const daysInMonth = moment(month).daysInMonth();
@@ -18,20 +17,7 @@ const Earnings = () => {
   const [months, setMonths] = useState([]);
 
   useEffect(() => {
-    const customerRef = ref(database, 'ServiceList');
-    const unsubscribe = onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const customerList = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
-        }));
-        setCustomers(customerList);
-      } else {
-        setCustomers([]);
-      }
-    });
-
+    const unsubscribe = fetchServiceList(setCustomers);
     return () => unsubscribe();
   }, []);
 

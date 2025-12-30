@@ -214,3 +214,22 @@ export const listenCustomersByMobile = (mobile, setCustomers) => {
 
   return unsubscribe;
 };
+
+export const fetchServiceList = (setCustomers) => {
+  const customerRef = ref(database, "ServiceList");
+
+  const unsubscribe = onValue(customerRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const customerList = Object.keys(data).map((key) => ({
+        id: key,
+        ...data[key],
+      }));
+      setCustomers(customerList);
+    } else {
+      setCustomers([]);
+    }
+  });
+
+  return unsubscribe;
+};

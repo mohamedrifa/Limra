@@ -15,7 +15,8 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const [customerId, setCustomerId] = useState("");
   const [mobile, setMobile] = useState();
-
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const dates = Array.from({ length: 30 }, (_, i) =>
     moment().add(-i, 'days').format('YYYY-MM-DD')
@@ -79,13 +80,13 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       Alert.alert("Error","Unable to open Dial Pad");
     }
   };
-  const [searchActive, setSearchActive] = useState(false);
+  
   const searchHandler = async () => {
     if(searchActive === false){
       setSearchActive(true);
     }
   };
-  const [searchQuery, setSearchQuery] = useState('');
+  
   const filteredCustomers = customers.filter(item =>
     (item.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
     (item.city?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
