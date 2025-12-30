@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import moment from 'moment';
 
 export default function CustomerTimelineItem({
   item,
   index,
   customers,
-  styles,
   onPress,
 }) {
   const currentMonth = moment(item.date).format('MMMM YYYY');
@@ -65,7 +64,7 @@ export default function CustomerTimelineItem({
             </Text>
           </View>
           <Image
-            source={require('../assets/vectors/pin.png')}
+            source={require('../../assets/vectors/pin.png')}
             style={{ width: 13, height: 13, marginTop: 5 }}
           />
         </View>
@@ -99,3 +98,65 @@ export default function CustomerTimelineItem({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+    monthHeader: {
+    fontWeight: 400,
+    fontSize: 14,
+    color: '#4A4E69'
+  },
+  listView: {
+    paddingHorizontal: 17,
+    backgroundColor: '#EBF4FE',
+    alignItems: 'center',
+    flexDirection: 'row'
+  },
+  listDate: {
+    color: '#22223B',
+    fontWeight: 400,
+    fontSize: 14,
+  },
+  serviceTypes: {
+    fontFamily: 'Poppins',
+    color: '#22223B',
+    fontWeight: 400,
+    fontSize: 16,
+    marginLeft: 19,
+    textAlign: 'left',
+    marginTop: 10,
+    marginBottom: 10
+  },
+  lineView: {
+    width: 16,
+    height: '100%',
+    marginLeft: 19,
+    alignItems: 'center',
+  },
+  line: {
+    flex: 1,
+    width: 2,
+    backgroundColor: '#0080DA',
+  },
+  ovalMark1: {
+    width: 10,
+    height: 10,
+    backgroundColor: '#0095FF',
+    borderRadius: 5,
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '50%', 
+    left: '50%',
+    transform: [{ translateX: -5 }, { translateY: -5 }]
+  },
+  ovalMark2: {
+    width: 15,
+    height: 15,
+    backgroundColor: '#0080DA',
+    borderRadius: 10,
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '50%', 
+    left: '50%',
+    transform: [{ translateX: -7.5 }, { translateY: -7.5 }]
+  }
+});
