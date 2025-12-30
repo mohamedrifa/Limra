@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { Picker } from '@react-native-picker/picker';
+import { View, StyleSheet, FlatList } from 'react-native';
 import moment from 'moment';
+import DayEarningsItem from '../../component/earnings/DayEarningsItem';
+import Header from '../../component/earnings/Header';
 import { fetchServiceList } from '../../api/serviceApi';
 
 const generateDates = (month) => {
@@ -48,89 +48,24 @@ const Earnings = () => {
   }, 0);
   return (
     <View style={styles.container}>
-      <LinearGradient 
-        colors={['#5D5DA1', '#22223B']} 
-        style={styles.topContainer}
-        start={{ x: 0, y: 1 }}
-        end={{ x: 1, y: 0 }}>
-        <Text style={styles.topText}>Monthly Earnings</Text>
-        <View style={styles.picker}>
-          <Picker
-            selectedValue={selectedMonth}
-            onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-            style={{ position: 'absolute', height: '100%', width: '100%' }}
-            dropdownIconColor={'#F2E9E4'}
-          >
-            {months.map((month) => (
-              <Picker.Item key={month.value} label={month.label} value={month.value} />
-            ))}
-          </Picker>
-          <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', pointerEvents: 'none', justifyContent: 'center' }}>
-            <Text style={styles.pickerText}>{moment(selectedMonth).format('MMMM YYYY')}</Text>
-            <Image source={require('../../assets/vectors/pickerDownArrow.png')} style={{ width: 8, height: 8, resizeMode: 'cover', marginLeft: 5 }} />
-          </TouchableOpacity>
-        </View>
-        <View style={{width: 254, height: 71, flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center'}}>
-            <View>
-              <Text style={styles.totalEarningsText}>Total Services</Text>
-              <Text style={styles.totalText}>{monthlyServices}</Text>
-            </View>
-            <View>
-              <Text style={styles.totalEarningsText}>Total Earnings</Text>
-              <Text style={styles.totalText}>₹{monthlyEarnings}</Text>
-            </View>
-        </View>
-      </LinearGradient>
+      <Header
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        months={months}
+        monthlyServices={monthlyServices}
+        monthlyEarnings={monthlyEarnings}
+      />
       <FlatList
         data={dates}
         keyExtractor={(item, index) => index.toString()}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={<View style={{ height: 77 }} />}
-        renderItem={({ item: date }) => {
-          const dateWise = customers.filter(customer => 
-            customer.date === moment(date).format("YYYY-MM-DD")
-          );
-          let dailyEarnings = dateWise.reduce((sum, customer) => 
-            sum + Number(customer.billTotals?.commisionTotal || 0), 0);
-
-          if (dateWise.length === 0) return null;
-          
-          return (
-            <View style={{ width: '100%', height: 101, paddingHorizontal: 15, paddingVertical: 9 }}>
-              <View style={{ width: 54, height: 21, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontFamily: 'Poppins', fontSize: 14, fontWeight: '300', color: '#22223B' }}>Day</Text>
-                <Text style={{ fontFamily: 'Quantico', fontSize: 14, fontWeight: '400', color: '#22223B' }}>{moment(date).format("D")}</Text>
-              </View>
-              <ScrollView 
-                style={{ height: 42, width: '80%' }}
-                scrollEnabled={true}
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}>
-                {dateWise.map((customer) => (
-                  <Text key={customer.id} style={{ fontFamily: 'Poppins', fontSize: 14, fontWeight: 300, color: '#22223B', marginTop: 10 }}>
-                    {customer.serviceType} - {customer.name}
-                  </Text>
-                ))}
-              </ScrollView>
-              { dailyEarnings>0 ? (
-                <View style={styles.perDayContainer}>
-                  <Text style={styles.perDayText}>{dailyEarnings}</Text>
-                  <Image source={require('../../assets/vectors/plusViolet.png')} style={styles.perDayIcon} />
-                </View>
-              ): dailyEarnings>0 ?(
-                <View style={styles.perDayContainer}>
-                  <Text style={styles.perDayText}>{-dailyEarnings}</Text>
-                  <Image source={require('../../assets/vectors/minusViolet.png')} style={styles.perDayIcon} />
-                </View>
-              ):(
-                <View style={styles.perDayContainer}>
-                  <Text style={styles.perDayText}>{-dailyEarnings}</Text>
-                </View>
-              )
-              }
-            </View>
-          );
-        }}
+        renderItem={({ item }) => (
+          <DayEarningsItem
+            date={item}
+            customers={customers}
+          />
+        )}
       />
     </View>
   );
@@ -140,75 +75,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5'
   },
-  topContainer: {
-    width: '100%',
-    height: 238,
-  },
-  topText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 24,
-    alignSelf: 'center',
-    marginTop: 55,
-    color: '#FFFFFF'
-  },
-  picker: {
-    width: 100,
-    height: 15,
-    backgroundColor: '#F2E9E4',
-    borderRadius: 30,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  pickerText: {
-    fontFamily: 'Poppins',
-    fontWeight: 300,
-    fontSize: 10,
-    color: '#22223B'
-  },
-  totalEarningsText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 14,
-    color: '#FFFFFF',
-    alignSelf: 'center',
-    marginTop: 29
-  },
-  totalText: {
-    width: '100%',
-    fontFamily: 'Quando',
-    fontWeight: 400,
-    fontSize: 24,
-    color: '#FFFFFF',
-    textAlign: 'center'
-  },
-  perDayContainer: {
-    height: 23,
-    position: 'absolute',
-    justifyContent: 'space-between',
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    top: 39,
-    right: 15,
-
-  },
-  perDayIcon: {
-    width: 10,
-    height: 10,
-    marginRight: 10,
-    resizeMode: 'contain',
-  },
-  perDayText: {
-    fontFamily: 'Quando',
-    fontWeight: 400,
-    fontSize: 18,
-    color: '#22223B',
-  }
-
 });
 
 export default Earnings;
