@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
+import { ref, onValue, set, get, update} from 'firebase/database';
 import { database } from '../../firebase';
 import moment from 'moment';
 import { Alert, Keyboard } from 'react-native';
@@ -190,5 +190,27 @@ export const fetchMergedCustomer = (setCustomers) => {
     },
     { onlyOnce: false }
   );
+  return unsubscribe;
+};
+
+export const listenCustomersByMobile = (mobile, setCustomers) => {
+  const customerRef = ref(database, 'ServiceList');
+  const unsubscribe = onValue(customerRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) {
+      setCustomers([]);
+      return;
+    }
+    const customers = Object.keys(data)
+      .filter((key) => data[key]?.mobile === mobile)
+      .map((key) => ({
+        id: key,
+        ...data[key],
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    setCustomers(customers);
+  });
+
   return unsubscribe;
 };

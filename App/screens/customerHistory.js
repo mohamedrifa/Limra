@@ -1,50 +1,32 @@
-import React, {useEffect, useState, useRef} from 'react';
-import { getDatabase, ref, onValue, set, get, update} from 'firebase/database';
-import { database } from '../../firebase';
-import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, BackHandler, TouchableOpacity, FlatList, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import AddCustomer from './AddService';
+import { listenCustomersByMobile } from '../api/serviceApi';
+import CustomerTimelineItem from '../component/history/CustomerTimelineItem';
+import AddCustomerModal from '../component/services/AddCustomerModal';
 
 export default function CustomerHistory({mobile, navigateToServiceAdd}){
 
   const [customers, setCustomers] = useState([]);
-  useEffect(() => {
-    const customerRef = ref(database, 'ServiceList');
-    const unsubscribe = onValue(customerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const filteredCustomers = Object.keys(data)
-          .filter((key) => data[key]?.mobile === mobile)
-          .map((key) => ({
-            id: key,
-            ...data[key],
-          }));
-          
-        {/*  new Date(b.date) - new Date(a.date)   for descending order*/}
-        const sortedCustomers = filteredCustomers.sort((a, b) => new Date(a.date) - new Date(b.date));
-        setCustomers(sortedCustomers);
-      } else {
-        setCustomers([]);
-      }
-    });
-  
-    return () => unsubscribe();
-  }, [mobile]); // Added `mobile` if it changes
-  
-  
-
-  useEffect(() => {
-      const backAction = () => {
-        navigateToServiceAdd();
-        return true;
-      };
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-      return () => backHandler.remove();
-    }, [navigateToServiceAdd]);
-
-  const [addCustomerPage, setAddCustomerPage] = useState(false)
+  const [addCustomerPage, setAddCustomerPage] = useState(false);
   const [customerId, setCustomerId] = useState("");
+
+  useEffect(() => {
+    if (!mobile) return;
+    const unsubscribe = listenCustomersByMobile(mobile, setCustomers);
+    return () => unsubscribe();
+  }, [mobile]);
+
+  useEffect(() => {
+    const backAction = () => {
+      navigateToServiceAdd();
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [navigateToServiceAdd]);
+
+  
   const customerAdd = async (Id) => {
     setCustomerId(Id);
     setAddCustomerPage(true);
@@ -75,59 +57,21 @@ export default function CustomerHistory({mobile, navigateToServiceAdd}){
         showsVerticalScrollIndicator={false}
         ListFooterComponent={<View style={{ height: 30 }} />}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => {
-          const currentMonth = moment(item.date).format("MMMM YYYY");
-          const prevMonth = customers[index - 1];
-          let showMonthHeader = false;
-
-          if ( index === 0 || moment(prevMonth.date).format("MMMM YYYY") !== currentMonth ) {
-            showMonthHeader = true;
-          }
-          const nextItem = customers[index + 1];
-          let isLastMonth = false;
-          if(!nextItem || moment(nextItem.date).format("MMMM YYYY") !== currentMonth){
-            isLastMonth = true;
-          }
-          return (
-            <View style={styles.card}>
-                {showMonthHeader && (
-                  <View style={{ width: '100%', height: 64, alignItems: 'center', flexDirection: 'row', paddingLeft: 16 }}>
-                    <Text style={[styles.monthHeader, {fontFamily: 'Poppins'}]}>{moment(item.date).format("MMMM")} </Text>
-                    <Text style={[styles.monthHeader, {fontFamily: 'Quantico'}]}>{moment(item.date).format("YYYY")}</Text>
-                  </View>
-                )}
-                <TouchableOpacity style={styles.listView} onPress={() => customerAdd(item.id)}>
-                  <View style={{width:78, height: 44, alignItems: 'center', justifyContent: 'center', marginTop: 10, marginBottom: 10}}>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={[styles.listDate, {fontFamily: 'Quantico'}]}>{moment(item.date).format("DD ")}</Text>
-                      <Text style={[styles.listDate, {fontFamily: 'Poppins'}]}>{moment(item.date).format("MMM")}</Text>
-                    </View>
-                    <Image source={require('../assets/vectors/pin.png')} style={{width: 13, height: 13, marginTop: 5}}/>
-                  </View>
-                  <View style={[styles.lineView, index === 0 && {flexDirection: 'column-reverse'}]}>
-                    <View 
-                    style={[
-                      customers.length !== 1 && styles.line,
-                      index === 0 && {flex: 0.5},
-                      index === customers.length - 1 && {flex: 0.5},
-                      ]}/>
-                    <View 
-                      style={[
-                        styles.ovalMark2,
-                        showMonthHeader && styles.ovalMark1,
-                        isLastMonth && styles.ovalMark1
-                        ]}/>
-                  </View>
-                  <Text style={styles.serviceTypes}>{item.serviceType.replace(/, /g,', \n')}</Text>
-                </TouchableOpacity>
-            </View>
-          );
-        }}/>
-      { addCustomerPage && (
-        <View style={{position: 'absolute', width: '100%', height: '100%'}}>
-          <AddCustomer navigateToServiceAdd={() => navigateBack()} customerId={customerId}/>
-        </View>
-      )}
+        renderItem={({ item, index }) => (
+          <CustomerTimelineItem
+            item={item}
+            index={index}
+            customers={customers}
+            styles={styles}
+            onPress={customerAdd}
+          />
+        )}
+      />
+      <AddCustomerModal
+        visible={addCustomerPage}
+        navigateBack={()=>navigateBack()}
+        customerId={customerId}
+      />
     </View>
   );
 };
