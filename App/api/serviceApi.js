@@ -160,3 +160,35 @@ export const saveCustomerService = ({
     })
     .catch((error) => alert(`Error: ${error.message}`));
 };
+
+export const fetchMergedCustomer = (setCustomers) => {
+  const customerRef = ref(database, 'ServiceList');
+  const unsubscribe = onValue(
+    customerRef,
+    (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        setCustomers([]);
+        return;
+      }
+      const customerList = Object.keys(data).map((key) => ({
+        id: key,
+        ...data[key],
+      }));
+      const mergedCustomers = Object.values(
+        customerList.reduce((acc, customer) => {
+          const mobile = customer.mobile;
+          if (!acc[mobile]) {
+            acc[mobile] = { ...customer, ids: [customer.id] };
+          } else {
+            acc[mobile].ids.push(customer.id);
+          }
+          return acc;
+        }, {})
+      );
+      setCustomers(mergedCustomers);
+    },
+    { onlyOnce: false }
+  );
+  return unsubscribe;
+};

@@ -11,31 +11,31 @@ const ImageSlider = ({ serviceType }) => {
   useEffect(() => {
     let serviceImages = [];
     if (serviceType.includes("A.C")) {
-      serviceImages.push(require("../assets/images/Machines/AC.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/AC.jpg"));
     }
     if (serviceType.includes("Washing Machine")) {
-      serviceImages.push(require("../assets/images/Machines/Washing_Machine.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Washing_Machine.jpg"));
     }
     if (serviceType.includes("Refrigerator")) {
-      serviceImages.push(require("../assets/images/Machines/Refrigerator.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Refrigerator.jpg"));
     }
     if (serviceType.includes("Microwave Oven")) {
-      serviceImages.push(require("../assets/images/Machines/Microwave.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Microwave.jpg"));
     }
     if (serviceType.includes("RO Water Purifier")) {
-      serviceImages.push(require("../assets/images/Machines/RO_Purifier.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/RO_Purifier.jpg"));
     }
     if (serviceType.includes("Water Heater")) {
-      serviceImages.push(require("../assets/images/Machines/Heater.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Heater.jpg"));
     }
     if (serviceType.includes("Induction Stove")) {
-      serviceImages.push(require("../assets/images/Machines/Induction.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Induction.jpg"));
     }
     if (serviceType.includes("Inverter/Battery")) {
-      serviceImages.push(require("../assets/images/Machines/Inverter.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Inverter.jpg"));
     }
     if (serviceType.includes("Other")) {
-      serviceImages.push(require("../assets/images/Machines/Others.jpg"));
+      serviceImages.push(require("../../assets/images/Machines/Others.jpg"));
     }
     const duplicatedImages = [
       serviceImages[0],

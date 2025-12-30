@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import moment from "moment";
-import ImageSlider from "../imageSlider";
+import ImageSlider from "./imageSlider";
 
 export default function TaskCard({
   item,

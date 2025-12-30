@@ -6,7 +6,7 @@ import DeleteConfirmModal from '../../component/dashboard/DeleteConfirmModal';
 import moment from 'moment';
 import { Services } from '../../constants/varConst';
 import LinearGradient from 'react-native-linear-gradient';
-import { fetchTasks, fetchTaskById, saveTaskToDB, updateCompletedTasks, deleteTaskAtDB, fetchCustomerByMobile, addTaskToProfile } from '../../api/taskApi';
+import { fetchTasks, fetchTaskById, saveTaskToDB, updateCompletedTasks, deleteTaskAtDB, addTaskToProfile } from '../../api/taskApi';
 
 export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
@@ -45,11 +45,8 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
 
   const handleEditTask = async (taskId) => {
     setTempTaskId(taskId);
-    const task = await fetchTaskById(taskId);
-    if (task) {
-      setCustomer(task);
-      sendToEdit(true);
-    }
+    sendToEdit(true);
+    fetchTaskById(taskId, setCustomer);
   };
 
   const saveTask = async () => {

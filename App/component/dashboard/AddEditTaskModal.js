@@ -30,6 +30,7 @@ export default function AddEditTaskModal({
   closeModal, // 🔹 passed from parent
 }) {
   if (!(toEdit || toAdd)) return null;
+  console.log(customer);
 
   return (
     <Pressable

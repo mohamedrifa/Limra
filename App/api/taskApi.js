@@ -35,26 +35,25 @@ export const fetchTasks = (onUpdate) => {
 
 /* ---------------- FETCH TASK BY ID ---------------- */
 
-export const fetchTaskById = async (taskId) => {
+export const fetchTaskById = async (taskId, setCustomer) => {
   const cacheKey = `TASK_${taskId}`;
-
-  // ⚡ Return cached task first
-  const cached = await getCache(cacheKey);
-  if (cached) return cached;
-
   try {
-    const snapshot = await get(ref(database, `Tasks/${taskId}`));
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      setCache(cacheKey, data);
-      return data;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      console.log('FROM CACHE');
+      setCustomer(cached);
     }
-    return null;
+    const snapshot = await get(ref(database, `Tasks/${taskId}`));
+    if (!snapshot.exists()) return;
+    const data = snapshot.val();
+    console.log('FROM FIREBASE');
+    await setCache(cacheKey, data);
+    setCustomer(data);
   } catch (error) {
-    console.error("Fetch task error:", error);
-    return null;
+    console.error('Fetch task error:', error);
   }
 };
+
 
 /* ---------------- SAVE TASK ---------------- */
 
@@ -64,6 +63,7 @@ export const saveTaskToDB = async ({ taskId, customer, toAdd, overallTasks }) =>
 
     // 💾 update cache
     setCache(`TASK_${taskId}`, customer);
+    console.log(customer);
 
     if (toAdd) {
       await update(ref(database, "Tasks"), {
