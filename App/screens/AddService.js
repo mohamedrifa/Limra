@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, FlatList, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { Services } from '../constants/varConst';
-import BillGenerator from '../component/billGenerator';
+import BillGenerator from '../component/serviceAdd/BillGenerator';
 import MobileSuggestion from '../component/mobileSuggestion';
 import CustomPicker from '../component/customPicker';
 import { fetchServiceById, saveCustomerService } from "../api/serviceApi";
+import BillTable from '../component/serviceAdd/BillTable';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
@@ -162,87 +163,14 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
               <BillGenerator customerId={customerId} customer={customer} billItems={billItems} billTotals={billTotals}/>
             </View>)}
           </View>
-          <ScrollView horizontal style={{marginTop: 18}} showsHorizontalScrollIndicator={false}>
-            <View style={{flexDirection: 'column'}}>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableHorizontalLine1}/>
-                <View style={styles.tableHorizontalLine2}/>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableSNo}><Text style={styles.headerText}>S.NO</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableParticulars}><Text style={styles.headerText}>Particulars</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableRate}><Text style={styles.headerText}>Rate</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableQty}><Text style={styles.headerText}>Qty</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableTotal}><Text style={styles.headerText}>Total</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableOgPrice}><Text style={styles.headerText}>Original Price</Text></View>
-                <View style={styles.tableVerticalLine2}/>
-                <View style={styles.tableCommision}><Text style={styles.headerText}>Balance</Text></View>
-                <View style={styles.tableVerticalLine2}/>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableHorizontalLine1}/>
-                <View style={styles.tableHorizontalLine2}/>
-              </View>
-              <FlatList
-                data={billItems}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item, index }) => (
-                <View style={{flexDirection:'column'}}>
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableSNo}><Text style={styles.headerText}>{item.id}</Text></View>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableParticulars}><TextInput style={[styles.inputText, {width: '100%'}]} onFocus={()=>setShowSuggestion(false)} value={item.particulars|| ''} onChangeText={(text) => handleInputChange(index, 'particulars', text)} /></View>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableRate}><TextInput style={styles.inputText} onFocus={()=>setShowSuggestion(false)} value={item.rate|| ''} onChangeText={(text) => {handleInputChange(index, 'rate', text), ogChange(index, 'rate', text)}} /></View>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableQty}><TextInput style={styles.inputText} onFocus={()=>setShowSuggestion(false)} keyboardType="numeric" value={item.qty|| ''} onChangeText={(text) => handleInputChange(index, 'qty', text)} /></View>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={styles.tableTotal}><Text style={[styles.inputText,{width: '100%', textAlign: 'right', marginRight: 8}]}>{item.total|| ''}</Text></View>
-                    <View style={styles.tableVerticalLine1}/>
-                    <View style={[styles.tableOgPrice, {alignItems: 'flex-end'}]}><TextInput style={styles.inputText} keyboardType="numeric" value={item.originalPrice|| ''} onFocus={()=>setShowSuggestion(false)} onChangeText={(text) => handleInputChange(index, 'originalPrice', text)} /></View>
-                    <View style={styles.tableVerticalLine2}/>
-                    <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right',marginRight: 8}]}>{item.commission|| ''}</Text></View>
-                    <View style={styles.tableVerticalLine2}/>
-                  </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={styles.tableHorizontalLine1}/>
-                    <View style={styles.tableHorizontalLine2}/>
-                  </View>
-                </View>
-                )}
-              />
-              <TouchableOpacity style={styles.addRowButton} onPress={handleAddRow}>
-                <Text style={styles.addButtonText}>Add 1 more row</Text>
-                <Image style={styles.addButtonIcon} source={require('../assets/vectors/plus_black.png')}/>
-              </TouchableOpacity>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableHorizontalLine1}/>
-                <View style={styles.tableHorizontalLine2}/>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.overallTotal}><Text style={styles.headerText}>Total</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableTotal}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.customTotal}</Text></View>
-                <View style={styles.tableVerticalLine1}/>
-                <View style={styles.tableOgPrice}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.ogTotal}</Text></View>
-                <View style={styles.tableVerticalLine2}/>
-                <View style={styles.tableCommision}><Text style={[styles.inputText,{ width: '100%',textAlign: 'right', marginRight: 8}]}>{billTotals.commisionTotal}</Text></View>
-                <View style={styles.tableVerticalLine2}/>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <View style={styles.tableHorizontalLine1}/>
-                <View style={styles.tableHorizontalLine2}/>
-              </View>
-            </View>
-          </ScrollView>
+          <BillTable
+            billItems={billItems}
+            billTotals={billTotals}
+            handleInputChange={handleInputChange}
+            ogChange={ogChange}
+            setShowSuggestion={setShowSuggestion}
+            handleAddRow={handleAddRow}
+          />
         </View>
         <View style={{height: 80}}/>
       </ScrollView>
@@ -319,35 +247,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 10,
   },
-  downloadButton: {
-    width: 93,
-    height: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#22223B',
-    marginTop: 10,
-  },
-  downloadText: {
-    fontSize: 14,
-    fontFamily: 'Poppins',
-    fontWeight: 600,
-    color: '#4A4E69'
-  },
-  shareButton: {
-    width: 116,
-    height: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#22223B',
-    marginTop: 10,
-  },
-  shareText: {
-    fontSize: 14,
-    fontFamily: 'Poppins',
-    fontWeight: 600,
-    color: '#FFFFFF'
-  },
   picker: {
     height: 50,
     width: '100%',
@@ -366,112 +265,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEEFF', 
     pointerEvents: 'none', 
   },
-  tableHorizontalLine1:{
-    width: 466, 
-    height: 1, 
-    backgroundColor: '#22223B'
-  },
-  tableHorizontalLine2:{
-    width: 230, 
-    height: 1, 
-    backgroundColor: '#9A8C98'
-  },
-  tableVerticalLine1: {
-    height: 38,
-    width: 1,
-    backgroundColor: '#22223B',
-  },
-  tableVerticalLine2: {
-    height: 38,
-    width: 1,
-    backgroundColor: '#9A8C98',
-  },
-  tableSNo: {
-    width: 40,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableParticulars: {
-    width: 206,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableRate: {
-    width: 82,
-    height: 38,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableQty: {
-    width: 50,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableTotal: {
-    width: 82,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableOgPrice: {
-    width: 114,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tableCommision: {
-    width: 114,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  headerText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    fontSize: 14,
-    color: '#22223B'
-  },
-  inputText: {
-    fontFamily: 'Poppins',
-    fontWeight: 400,
-    height: 60,
-    textAlignVertical: 'center',
-    color: '#22223B',
-  },
-  addRowButton: {
-    height: 20,
-    width: 466,
-    backgroundColor: '#C9ADA7',
-    borderStartColor: '#22223B',
-    borderEndColor: '#22223B',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    borderEndWidth: 1,
-    borderStartWidth: 1,
-  },
-  addButtonText: {
-    fontFamily: 'Poppins',
-    fontSize: 14,
-    fontWeight: 400,
-    color: '#22223B',
-  },
-  addButtonIcon: {
-    width: 10,
-    height: 10,
-    marginLeft: 10,
-    resizeMode: 'contain',
-  },
-  overallTotal: {
-    height: 38,
-    width: 381,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   submitButton: {
     position: 'absolute',
     bottom: 22,
@@ -486,18 +279,5 @@ const styles = StyleSheet.create({
     height: 43,
     width: 100,
     resizeMode: 'contain',
-  },
-  suggestionBg: {
-    backgroundColor: 'white', 
-    position: 'absolute', 
-    top: 196, 
-    left: 20, 
-    opacity: 0.8,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 4},
-    elevation: 4,
   },
 });

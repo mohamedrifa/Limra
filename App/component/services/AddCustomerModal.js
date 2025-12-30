@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import AddProfile from "../../screens/AddCustomer";
+import AddProfile from "../../screens/AddService";
 
 export default function AddCustomerModal({
   visible,

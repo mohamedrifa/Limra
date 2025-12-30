@@ -4,7 +4,7 @@ import { database } from '../../firebase';
 import moment from 'moment';
 import { View, Text, StyleSheet, BackHandler, TouchableOpacity, FlatList, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import AddCustomer from './AddCustomer';
+import AddCustomer from './AddService';
 
 export default function CustomerHistory({mobile, navigateToServiceAdd}){
 
