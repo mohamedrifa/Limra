@@ -4,9 +4,13 @@ import {
   orderByChild,
   equalTo,
   limitToLast,
+  startAt,
+  endAt,
   endBefore,
-  onValue
+  onValue,
+  off
 } from 'firebase/database';
+import moment from "moment";
 import { database } from '../../firebase';
 import { getCache, setCache, clearCache } from '../utils/cache';
 
@@ -332,20 +336,24 @@ export const fetchMergedCustomer = (setCustomers) => {
 export const listenCustomersByMobile = (mobile, setCustomers) => {
   const cacheKey = `customersByMobile_${mobile}`;
   getCache(cacheKey).then((cached) => {
-    if (cached) {
+    if (cached?.data) {
       setCustomers(cached.data);
     }
   });
-  const customerRef = ref(database, 'ServiceList');
-  const unsubscribe = onValue(customerRef, async (snapshot) => {
+  const customerRef = query(
+    ref(database, 'ServiceList'),
+    orderByChild('mobile'),
+    equalTo(mobile)
+  );
+  const listener = onValue(customerRef, async (snapshot) => {
     const data = snapshot.val();
+
     if (!data) {
       setCustomers([]);
       await clearCache(cacheKey);
       return;
     }
     const customers = Object.keys(data)
-      .filter((key) => data[key]?.mobile === mobile)
       .map((key) => ({
         id: key,
         ...data[key],
@@ -357,33 +365,41 @@ export const listenCustomersByMobile = (mobile, setCustomers) => {
       timestamp: Date.now(),
     });
   });
-
-  return unsubscribe;
+  return () => off(customerRef);
 };
 
-export const fetchServiceList = (setCustomers) => {
-  getCache(CACHE_KEYS.SERVICE_LIST).then((cached) => {
-    if (cached) {
+
+export const fetchServiceList = (selectedMonth, setCustomers) => {
+  const startDate = `${selectedMonth}-01`;
+  const endDate = moment(selectedMonth).endOf('month').format('YYYY-MM-DD');
+  const cacheKey = `${CACHE_KEYS.SERVICE_LIST}_${selectedMonth}`;
+  getCache(cacheKey).then((cached) => {
+    if (cached?.data) {
       setCustomers(cached.data);
     }
   });
-  const customerRef = ref(database, 'ServiceList');
-  const unsubscribe = onValue(customerRef, async (snapshot) => {
+  const customerRef = query(
+    ref(database, 'ServiceList'),
+    orderByChild('date'),
+    startAt(startDate),
+    endAt(endDate)
+  );
+  const listener = onValue(customerRef, async (snapshot) => {
     const data = snapshot.val();
-    if (data) {
-      const customerList = Object.keys(data).map((key) => ({
-        id: key,
-        ...data[key],
-      }));
-      setCustomers(customerList);
-      await setCache(CACHE_KEYS.SERVICE_LIST, {
-        data: customerList,
-        timestamp: Date.now(),
-      });
-    } else {
+    if (!data) {
       setCustomers([]);
-      await clearCache(CACHE_KEYS.SERVICE_LIST);
+      await clearCache(cacheKey);
+      return;
     }
+    const customerList = Object.keys(data).map((key) => ({
+      id: key,
+      ...data[key],
+    }));
+    setCustomers(customerList);
+    await setCache(cacheKey, {
+      data: customerList,
+      timestamp: Date.now(),
+    });
   });
-  return unsubscribe;
+  return () => off(customerRef);
 };
