@@ -4,6 +4,7 @@ import moment from 'moment';
 import DayEarningsItem from '../../component/earnings/DayEarningsItem';
 import Header from '../../component/earnings/Header';
 import { fetchServiceList } from '../../api/serviceApi';
+import AddCustomerModal from '../../component/services/AddCustomerModal';
 
 const generateDates = (month) => {
   const daysInMonth = moment(month, 'YYYY-MM').daysInMonth();
@@ -12,9 +13,10 @@ const generateDates = (month) => {
   );
 };
 
-const Earnings = () => {
+const Earnings = ({AddCustomer, navigateToCustomerAdd}) => {
   const [customers, setCustomers] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [tempCustomerId, setTempCustomerId] = useState("");
   const [months, setMonths] = useState([]);
 
   // 1️⃣ Prepare months
@@ -59,6 +61,11 @@ const Earnings = () => {
     );
   }, [customers]);
 
+  const navigateBack = async () => {
+    setTempCustomerId("");
+    navigateToCustomerAdd(false);
+  };
+
   return (
     <View style={styles.container}>
       <Header
@@ -78,8 +85,15 @@ const Earnings = () => {
           <DayEarningsItem
             date={item}
             customers={customers}
+            setCustomer={setTempCustomerId}
+            navigateToEdit={navigateToCustomerAdd}
           />
         )}
+      />
+      <AddCustomerModal
+        visible={AddCustomer}
+        navigateBack={()=>navigateBack()}
+        customerId={tempCustomerId}
       />
     </View>
   );

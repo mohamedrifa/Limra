@@ -10,6 +10,7 @@ import { fetchServiceById, saveCustomerService } from "../api/serviceApi";
 import BillTable from '../component/serviceAdd/BillTable';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
+  console.log(customerId);
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
   const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
   const [billTotals, setBillTotals] = useState({ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'});

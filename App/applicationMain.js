@@ -69,14 +69,12 @@ const ApplicationMain = () => {
       return <ServiceAdd 
                 navigateToCustomerAdd={setAddCustomerPage} 
                 AddCustomer={addCustomerPage}
-
                 navigateToMessages={() => setMessagesPage(true)} 
-                
                 navigateToHistory={setCustomerHisPage}
                 history={customerHisPage}
                 />;
     case 'Earnings':
-      return <Earnings/>;
+      return <Earnings AddCustomer={addCustomerPage} navigateToCustomerAdd={setAddCustomerPage} />;
     case 'Settings':
       return <Settings changePass={changePass} terms={terms} sendToChange={setChangePass} sendTerms={setTerms}/>;
     default:
