@@ -104,7 +104,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       item.address?.toLowerCase().includes(query) ||
       item.mobile?.includes(query)
     );
-  }, [customers, searchActive]);
+  }, [customers, searchActive, searchQuery]);
 
   const highlightText = (text, searchQuery) => {
     if (!text || !searchQuery) return text;
@@ -122,12 +122,11 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   };
 
   const loadMoreCustomers = () => {
-    if (loading || searchActive) return;
     fetchServices(
       selectedDate,
       setCustomers,
       setLoading,
-      false,
+      searchActive,
       true
     );
   };

@@ -97,14 +97,27 @@ export const fetchServices = async (
       setCustomers(cached.data);
       setLoading(false);
     }
-    const q = query(
-      ref(database, 'ServiceList'),
-      orderByKey(),
-      limitToLast(50) 
-    );
+    console.log("before");
+    let q;
+    if (loadMore && lastKeyMap['search']) {
+      q = query(
+        ref(database, 'ServiceList'),
+        orderByChild('date'),
+        endBefore(lastKeyMap['search']),
+        limitToLast(10)
+      );
+    } else {
+      q = query(
+        ref(database, 'ServiceList'),
+        orderByChild('date'),
+        limitToLast(10)
+      );
+    }
+    console.log("passed query");
     const unsubscribe = onValue(
       q,
       async (snapshot) => {
+        console.log("passed unsubscribe");
         const data = snapshot.val();
         if (!data) {
           setCustomers([]);
@@ -115,7 +128,13 @@ export const fetchServices = async (
           id: key,
           ...data[key],
         }));
-        setCustomers(list);
+        lastKeyMap['search'] = list[0].date;
+        console.log(loadMore);
+        setCustomers((prev = []) =>
+          loadMore && prev.length > 10
+            ? [...prev, ...list]
+            : list
+        );
         await setCache(CACHE_KEYS.SERVICE_LIST, {
           data: list,
           timestamp: Date.now(),
@@ -172,8 +191,10 @@ export const fetchServices = async (
           ...data[key],
         }));
       lastKeyMap[selectedDate] = list[0].id;
-      setCustomers((prev) =>
-        loadMore ? [...prev, ...list] : list
+      setCustomers((prev = []) =>
+        loadMore && prev.length > 10
+          ? [...prev, ...list]
+          : list
       );
       if (!loadMore) {
         await setCache(cacheKey, {
