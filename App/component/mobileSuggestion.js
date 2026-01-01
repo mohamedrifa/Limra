@@ -25,9 +25,7 @@ export default function MobileSuggestion({ visible, customer, setCustomer }) {
   );
 
   const selectedSuggestion = async (mobileNo) => {
-    const customerData = await selectCustomerByMobile(mobileNo);
-    if (!customerData) return;
-    setCustomer(customerData);
+    selectCustomerByMobile(mobileNo, setCustomer);
   };
 
   return (

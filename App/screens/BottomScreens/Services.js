@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useMemo} from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Keyboard, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
@@ -16,6 +16,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const [customerId, setCustomerId] = useState("");
   const [mobile, setMobile] = useState();
   const [searchActive, setSearchActive] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const dates = Array.from({ length: 30 }, (_, i) =>
@@ -24,9 +25,16 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = fetchServices(setCustomers);
-    return () => unsubscribe();
-  }, []);
+    let unsub;
+    fetchServices(
+      selectedDate,
+      setCustomers,
+      setLoading,
+      searchActive,
+      false
+    ).then(u => unsub = u);
+    return () => unsub && unsub();
+  }, [selectedDate, searchActive]);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -86,13 +94,18 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       setSearchActive(true);
     }
   };
-  
-  const filteredCustomers = customers.filter(item =>
-    (item.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-    (item.city?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-    (item.address?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-    (item.mobile || "").includes(searchQuery)
-  );
+
+  const filteredCustomers = useMemo(() => {
+    if (!searchActive) return customers;
+    const query = searchQuery.toLowerCase();
+    return customers.filter(item =>
+      item.name?.toLowerCase().includes(query) ||
+      item.city?.toLowerCase().includes(query) ||
+      item.address?.toLowerCase().includes(query) ||
+      item.mobile?.includes(query)
+    );
+  }, [customers, searchActive]);
+
   const highlightText = (text, searchQuery) => {
     if (!text || !searchQuery) return text;
     const parts = text.split(new RegExp(`(${searchQuery})`, 'gi'));
@@ -107,10 +120,21 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
     }
     return text;
   };
+
+  const loadMoreCustomers = () => {
+    if (loading || searchActive) return;
+    fetchServices(
+      selectedDate,
+      setCustomers,
+      setLoading,
+      false,
+      true
+    );
+  };
   
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF', marginBottom: keyboardHeight }}>
-      <View style={styles.container}>
+      <View style={{flex: 1}}>
         <TopBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -125,8 +149,10 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
           date={date}
           setDate={setDate}
         />
-        <View style={styles.serviceListContainer}>
-          <Text style={styles.noDataText}>No Entries</Text>
+        <View style={{flex: 1}}>
+          <Text style={styles.noDataText}>
+            {loading ? "Loading..." : customers.length === 0 && "No Entries"}
+          </Text>
           {!searchActive && (
             <View style={styles.addButtonContainer}>
             <TouchableOpacity style={[styles.addButton, {width: '49%'}]} onPress={customerAdd}>
@@ -152,11 +178,14 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
           </View>
           )}
           <FlatList
-            data={searchActive ? filteredCustomers : customers}
             style={{ marginTop: 10 }}
-            showsVerticalScrollIndicator={false}
-            ListFooterComponent={<View style={{height: 77}} />}
+            data={filteredCustomers}
             keyExtractor={(item) => item.id}
+            onEndReached={loadMoreCustomers}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            removeClippedSubviews={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
             renderItem={({ item }) => (
               <ServiceCard
                 item={item}

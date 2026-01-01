@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 
-export default function ServiceCard ({
+function ServiceCard ({
   item,
   selectedDate,
   searchActive,
@@ -164,3 +164,5 @@ const styles = StyleSheet.create({
     color: "#22223B",
   },
 });
+
+export default memo(ServiceCard);
