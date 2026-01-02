@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect}from 'react';
 import { View, Text, StyleSheet, Image, Alert, Animated, TouchableOpacity, FlatList, ScrollView, TextInput } from 'react-native';
 import AddEditTaskModal from '../../component/dashboard/AddEditTaskModal';
 import TaskCard from '../../component/dashboard/TaskCard';
+import EmptyTaskList from '../../component/dashboard/EmptyTask';
 import DeleteConfirmModal from '../../component/dashboard/DeleteConfirmModal';
 import moment from 'moment';
 import { Services } from '../../constants/varConst';
@@ -186,6 +187,7 @@ export default function Dashboard({ toAdd, toEdit, sendToAdd, sendToEdit}){
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={<View style={{width:17}} />}
               ListFooterComponent={<View style={{width:7}} />}
+              ListEmptyComponent={!refresh ? null : <EmptyTaskList />}
               keyExtractor={(item) => item.id}
               renderItem={({ item, index }) => (
                 <TaskCard
