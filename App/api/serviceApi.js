@@ -97,58 +97,36 @@ export const fetchServices = async (
       setCustomers(cached.data);
       setLoading(false);
     }
-    console.log("before");
-    let q;
-    if (loadMore && lastKeyMap['search']) {
-      q = query(
-        ref(database, 'ServiceList'),
-        orderByChild('date'),
-        endBefore(lastKeyMap['search']),
-        limitToLast(10)
-      );
-    } else {
-      q = query(
-        ref(database, 'ServiceList'),
-        orderByChild('date'),
-        limitToLast(10)
-      );
-    }
-    console.log("passed query");
+    const customerRef = ref(database, 'ServiceList');
     const unsubscribe = onValue(
-      q,
+      customerRef,
       async (snapshot) => {
-        console.log("passed unsubscribe");
         const data = snapshot.val();
-        if (!data) {
+        if (data) {
+          const customerList = Object.keys(data).map((key) => ({
+            id: key,
+            ...data[key],
+          }));
+          setCustomers(customerList);
+          if (!loadMore) {
+            await setCache(CACHE_KEYS.SERVICE_LIST, {
+              data: customerList,
+              timestamp: Date.now(),
+            });
+          }
+        } else {
           setCustomers([]);
-          setLoading(false);
-          return;
         }
-        const list = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
-        }));
-        lastKeyMap['search'] = list[0].date;
-        console.log(loadMore);
-        setCustomers((prev = []) =>
-          loadMore && prev.length > 10
-            ? [...prev, ...list]
-            : list
-        );
-        await setCache(CACHE_KEYS.SERVICE_LIST, {
-          data: list,
-          timestamp: Date.now(),
-        });
         setLoading(false);
       },
-      { onlyOnce: true }
+      { onlyOnce: false }
     );
     return unsubscribe;
   }
+
   const cacheKey = `${CACHE_KEYS.SERVICE_LIST}_${selectedDate}`;
   if (!loadMore) {
     lastKeyMap[selectedDate] = null;
-
     const cached = await getCache(cacheKey);
     if (cached?.data) {
       setCustomers(cached.data);
@@ -190,12 +168,17 @@ export const fetchServices = async (
           id: key,
           ...data[key],
         }));
-      lastKeyMap[selectedDate] = list[0].id;
-      setCustomers((prev = []) =>
-        loadMore && prev.length > 10
-          ? [...prev, ...list]
-          : list
-      );
+      if (list.length > 0) {
+        lastKeyMap[selectedDate] = list[0].id;
+      }
+      setCustomers((prev = []) => {
+        if (loadMore && prev.length > 0) {
+          const existingIds = new Set(prev.map(item => item.id));
+          const newItems = list.filter(item => !existingIds.has(item.id));
+          return [...prev, ...newItems];
+        }
+        return list;
+      });
       if (!loadMore) {
         await setCache(cacheKey, {
           data: list,

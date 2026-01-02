@@ -141,7 +141,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           searchActive={searchActive}
-          setSearchActive={setSearchActive}
+          setSearchActive={()=>{setSearchActive((prev) => !prev); setSearchQuery("");}}
           dates={dates}
           open={open}
           setOpen={setOpen}
@@ -258,5 +258,12 @@ const styles = StyleSheet.create({
     fontWeight: 300,
     position: 'absolute',
     color: '#4A4E69'
+  },
+  loadingMore: {
+    fontFamily: 'Poppins',
+    textAlign: 'center',
+    padding: 10,
+    fontSize: 14,
+    color: '#4A4E69',
   },
 });
