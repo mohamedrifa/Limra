@@ -38,7 +38,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
 
   useEffect(() => {
     if (!customerId) return;
-    const unsubscribe = fetchServiceById(customerId, (data) => {
+    fetchServiceById(customerId, (data) => {
       if (!data) return;
       setCustomer(data);
       if (data.billItems) {
@@ -49,7 +49,6 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
         setBillTotals(data.billTotals);
       }
     });
-    return () => unsubscribe();
   }, [customerId]);
 
   useEffect(() => {
@@ -144,8 +143,9 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   };
 
   const handleSubmit = () => {
+    const { id, ...customerWithoutId } = customer; // exclude id
     saveCustomerService({
-      customer,
+      customer: customerWithoutId,
       customerId,
       billItems,
       billTotals,

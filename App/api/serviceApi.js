@@ -2,6 +2,7 @@ import {
   set,
   ref,
   query,
+  get,
   orderByChild,
   equalTo,
   limitToLast,
@@ -9,6 +10,7 @@ import {
   endAt,
   endBefore,
   onValue,
+  update,
   remove,
   off
 } from 'firebase/database';
@@ -30,30 +32,39 @@ export const selectCustomerByMobile = async (mobileNo, setCustomer) => {
     if (cached) {
       setCustomer(cached.data);
     }
+
     const snapshot = await get(ref(database, "ServiceList"));
     if (!snapshot.exists()) return;
     const data = snapshot.val();
-    const customerData = Object.keys(data)
-      .map((key) => ({ id: key, ...data[key] }))
+
+    // Include Firebase key as `id`
+    const customerData = Object.entries(data)
+      .map(([key, value]) => ({ id: key, ...value }))
       .find((item) => item.mobile === mobileNo);
+
     if (!customerData) return;
-    delete customerData.billItems;
-    delete customerData.billTotals;
-    delete customerData.isAddedToProfile;
+
+    // Remove unnecessary properties
+    const { billItems, billTotals, isAddedToProfile, ...rest } = customerData;
+
     const result = {
-      ...customerData,
+      ...rest,
       date: moment().format("YYYY-MM-DD"),
       serviceType: "",
     };
+
     setCustomer(result);
+
     await setCache(cacheKey, {
       data: result,
       timestamp: Date.now(),
     });
+
   } catch (error) {
     console.log("Error in selectCustomerByMobile:", error);
   }
 };
+
 
 export const MobileNumbersSuggest = (setSuggestions) => {
   getCache(CACHE_KEYS.MOBILE_SUGGESTIONS).then((cached) => {
@@ -203,7 +214,7 @@ export const addToTask = async (customerId) => {
     const taskRef = ref(database, 'Tasks/overallTasks');
     const overallSnapshot = await get(taskRef);
     const overallTasks = overallSnapshot.exists() ? overallSnapshot.val() : 0;
-    const { billItems, billTotals, ...filteredData } = snapshot.val();
+    const { billItems, billTotals, id, ...filteredData } = snapshot.val();
     filteredData.isAddedToProfile = false;
     filteredData.date = moment().format('YYYY-MM-DD');
     const autoId = moment().format('YYYYMMDDHHmmss');
@@ -293,25 +304,31 @@ export const saveCustomerService = async ({
     setIsSaved(true);
     Keyboard.dismiss();
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    Alert.alert(`Error: ${error.message}`);
   }
 };
 
 export const deleteCustomerService = async ({
   customerId,
-  customerMobile,
+  selectedDate,
   onSuccess,
 }) => {
-  if (!customerId) return Alert.alert('Invalid service id');
+  if (!customerId) return Alert.alert("Invalid service id");
+  console.log(customerId, selectedDate);
   try {
+    const cachedCustomer = await getCache(
+      `${CACHE_KEYS.CUSTOMER_PREFIX}id_${selectedDate}`
+    );
+    const customerMobile = cachedCustomer?.mobile;
     await remove(ref(database, `/ServiceList/${customerId}`));
     await clearCache(CACHE_KEYS.SERVICE_LIST);
     if (customerMobile) {
       await clearCache(`${CACHE_KEYS.CUSTOMER_PREFIX}${customerMobile}`);
     }
     await clearCache(`${CACHE_KEYS.CUSTOMER_PREFIX}id_${customerId}`);
-    Alert.alert('Success', 'Service deleted successfully');
-    if (onSuccess) onSuccess();
+    await clearCache(`${CACHE_KEYS.SERVICE_LIST}_${selectedDate}`);
+    Alert.alert("Success", "Service deleted successfully");
+    onSuccess?.();
   } catch (error) {
     Alert.alert(`Error: ${error.message}`);
   }

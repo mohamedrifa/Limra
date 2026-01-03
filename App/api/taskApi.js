@@ -59,8 +59,8 @@ export const fetchTaskById = async (taskId, setCustomer) => {
 
 export const saveTaskToDB = async ({ taskId, customer, toAdd, overallTasks }) => {
   try {
-    await set(ref(database, `Tasks/${taskId}`), customer);
-
+    const { id, ...payload } = item;
+    await set(ref(database, `Tasks/${taskId}`), payload);
     // 💾 update cache
     setCache(`TASK_${taskId}`, customer);
     console.log(customer);

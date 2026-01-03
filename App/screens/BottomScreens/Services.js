@@ -37,7 +37,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       false
     ).then(u => unsub = u);
     return () => unsub && unsub();
-  }, [selectedDate, searchActive]);
+  }, [selectedDate, searchActive, toDeleteId, AddCustomer]);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -137,6 +137,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const handleDelete = () => {
     deleteCustomerService({
       customerId: toDeleteId,
+      selectedDate: selectedDate,
       onSuccess: () => {
         console.log('Deleted:', toDeleteId);
       },
