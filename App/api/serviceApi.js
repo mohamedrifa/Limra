@@ -9,6 +9,7 @@ import {
   endAt,
   endBefore,
   onValue,
+  remove,
   off
 } from 'firebase/database';
 import { Alert, Keyboard } from 'react-native';
@@ -293,6 +294,26 @@ export const saveCustomerService = async ({
     Keyboard.dismiss();
   } catch (error) {
     alert(`Error: ${error.message}`);
+  }
+};
+
+export const deleteCustomerService = async ({
+  customerId,
+  customerMobile,
+  onSuccess,
+}) => {
+  if (!customerId) return Alert.alert('Invalid service id');
+  try {
+    await remove(ref(database, `/ServiceList/${customerId}`));
+    await clearCache(CACHE_KEYS.SERVICE_LIST);
+    if (customerMobile) {
+      await clearCache(`${CACHE_KEYS.CUSTOMER_PREFIX}${customerMobile}`);
+    }
+    await clearCache(`${CACHE_KEYS.CUSTOMER_PREFIX}id_${customerId}`);
+    Alert.alert('Success', 'Service deleted successfully');
+    if (onSuccess) onSuccess();
+  } catch (error) {
+    Alert.alert(`Error: ${error.message}`);
   }
 };
 

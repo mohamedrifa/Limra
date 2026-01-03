@@ -7,7 +7,8 @@ import ServiceCard from '../../component/services/ServiceCard';
 import TopBar from '../../component/services/TopBar';
 import AddCustomerModal from '../../component/services/AddCustomerModal';
 import HistoryModal from '../../component/services/HistoryModal';
-import { fetchServices, addToTask } from '../../api/serviceApi';
+import DeleteConfirmModal from '../../component/services/DeleteConfirmModal';
+import { fetchServices, addToTask, deleteCustomerService } from '../../api/serviceApi';
 
 export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, AddCustomer, navigateToHistory, history}){
   const [date, setDate] = useState(new Date());
@@ -18,6 +19,8 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
   const [searchActive, setSearchActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toDeleteId, setToDeleteId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const dates = Array.from({ length: 30 }, (_, i) =>
     moment().add(-i, 'days').format('YYYY-MM-DD')
@@ -130,6 +133,17 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
       true
     );
   };
+
+  const handleDelete = () => {
+    deleteCustomerService({
+      customerId: toDeleteId,
+      onSuccess: () => {
+        console.log('Deleted:', toDeleteId);
+      },
+    });
+    setToDeleteId(null);
+    setDeleteConfirm(false);
+  }
   
   return (
     <View style={{ flex: 1, backgroundColor: '#EBEEFF', marginBottom: keyboardHeight }}>
@@ -185,6 +199,7 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
             maxToRenderPerBatch={10}
             removeClippedSubviews={false}
             contentContainerStyle={{ paddingBottom: 100 }}
+            onScrollBeginDrag={() => setToDeleteId(null)} 
             renderItem={({ item }) => (
               <ServiceCard
                 item={item}
@@ -197,6 +212,10 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
                 openDialPad={openDialPad}
                 openWhatsApp={openWhatsApp}
                 addToTask={addToTask}
+                isOpen={toDeleteId === item.id}
+                onOpen={() => setToDeleteId(item.id)}
+                onClose={() => setToDeleteId(null)}
+                onDelete={() => setDeleteConfirm(true)}
               />
             )}
           />
@@ -211,6 +230,11 @@ export default function ServiceAdd({ navigateToCustomerAdd, navigateToMessages, 
         visible={history}
         navigateBack={()=>navigateBack()}
         mobile={mobile}
+      />
+      <DeleteConfirmModal
+        visible={deleteConfirm}
+        onCancel={() => {setDeleteConfirm(false); setToDeleteId(null);}}
+        onConfirm={handleDelete}
       />
     </View>
   );
