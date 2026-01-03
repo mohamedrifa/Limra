@@ -9,7 +9,7 @@ import LoginPages from "./loginPages";
 import ApplicationMain from "./applicationMain";
 import { database } from "../firebase";
 
-const CURRENT_VERSION = "1.2";
+const CURRENT_VERSION = "2.0";
 
 const Stack = createStackNavigator();
 
