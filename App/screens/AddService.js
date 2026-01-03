@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, BackHandler, TouchableOpacity, TextInput, ScrollView, Image, Keyboard } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
 import { Services } from '../constants/varConst';
@@ -8,9 +8,9 @@ import MobileSuggestion from '../component/mobileSuggestion';
 import CustomPicker from '../component/customPicker';
 import { fetchServiceById, saveCustomerService } from "../api/serviceApi";
 import BillTable from '../component/serviceAdd/BillTable';
+import DeleteActionBar from '../component/serviceAdd/DeleteActionBar';
 
 export default function AddCustomer({ navigateToServiceAdd, customerId }) {
-  console.log(customerId);
   const [customer, setCustomer] = useState({ name: '', mobile: '', date: moment(selectedDate).format('YYYY-MM-DD'), city: '', serviceType: 'Select type', address: '' });
   const [billItems, setBillItems] = useState([{ id: 1, particulars: '', rate: '', qty: '1', total: '0.00', originalPrice: '', commission: '0.00' }]);
   const [billTotals, setBillTotals] = useState({ customTotal: '0.00', ogTotal: '0.00', commisionTotal: '0.00'});
@@ -21,7 +21,10 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
   const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
   const [showSuggestion, setShowSuggestion] = useState(false);
-  
+
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [idToDelete, setIdToDelete] = useState("");
+  const blurTimerRef = useRef(null);
   const options = Services;
 
   useEffect(() => {
@@ -48,6 +51,13 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     });
     return () => unsubscribe();
   }, [customerId]);
+
+  useEffect(() => {
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setDeleteVisible(false);
+    });
+    return () => hideSub.remove();
+  }, []);
 
   const handleAddRow = () => {
     const lastItem = billItems[billItems.length - 1];
@@ -87,6 +97,52 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
     handleInputChange(index, field, value);
   };
 
+  const recalcTotals = (items) => {
+    const customTotal = items.reduce(
+      (sum, i) => sum + parseFloat(i.total || 0), 0
+    );
+    const ogTotal = items.reduce(
+      (sum, i) => sum + parseFloat(i.originalPrice || 0), 0
+    );
+    const commisionTotal = items.reduce(
+      (sum, i) => sum + parseFloat(i.commission || 0), 0
+    );
+    setBillTotals({
+      customTotal: customTotal.toFixed(2),
+      ogTotal: ogTotal.toFixed(2),
+      commisionTotal: commisionTotal.toFixed(2),
+    });
+  };
+
+  const handleDeleteBillItem = () => {
+    if (!idToDelete) return;
+    console.log(idToDelete);
+    setBillItems(prevItems => {
+      const filtered = prevItems.filter(item => item.id !== idToDelete);
+      const safeItems = filtered.length ? filtered : [{
+        id: 1, particulars: '', rate: '', qty: '1',
+        total: '0.00', originalPrice: '', commission: '0.00'
+      }];
+      const reindexed = safeItems.map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
+      recalcTotals(reindexed);
+      return reindexed;
+    });
+    blurTimerRef.current = setTimeout(() => {
+      setDeleteVisible(false);
+    }, 150);
+    const isLastItem = billItems[billItems.length - 1].id === idToDelete;
+    if (isLastItem) {
+      setIdToDelete(null);
+      return;
+    }
+    blurTimerRef.current = setTimeout(() => {
+      setDeleteVisible(true);
+    }, 200);
+  };
+
   const handleSubmit = () => {
     saveCustomerService({
       customer,
@@ -107,7 +163,7 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView style = {styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style = {[styles.scrollView, deleteVisible && { marginBottom: 80 }]} showsVerticalScrollIndicator={false}>
         <View style={{width: '100%',marginTop: 15, alignSelf: 'center', paddingLeft: 16, paddingRight: 16}}>
           <Text style={styles.promtText} >Name</Text>
           <TextInput style={styles.input} value={customer.name|| ''} onChangeText={(text) => setCustomer({ ...customer, name: text })} onFocus={()=>setShowSuggestion(false)}/>
@@ -171,13 +227,19 @@ export default function AddCustomer({ navigateToServiceAdd, customerId }) {
             ogChange={ogChange}
             setShowSuggestion={setShowSuggestion}
             handleAddRow={handleAddRow}
+            setDeleteVisible={setDeleteVisible}
+            setSelectedItemId={setIdToDelete}
           />
         </View>
         <View style={{height: 80}}/>
       </ScrollView>
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+      <TouchableOpacity style={[styles.submitButton, deleteVisible && { marginBottom: 80 }]} onPress={handleSubmit}>
         <Image style={styles.submitImage} source={require('../assets/vectors/SaveButton.png')}/>
       </TouchableOpacity>
+      <DeleteActionBar
+        visible={deleteVisible}
+        onDelete={handleDeleteBillItem}
+      />
     </View>
   );
 }
@@ -227,6 +289,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    marginBottom: 30,
   },
   promtText: {
     fontFamily: 'Poppins',
@@ -273,6 +336,7 @@ const styles = StyleSheet.create({
     height: 43,
     width: 100,
     borderRadius: 30,
+    marginBottom: 30,
     justifyContent: 'space-around',
     alignItems: 'center',
   },

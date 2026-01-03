@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
 const BillItemRow = ({
@@ -7,7 +7,32 @@ const BillItemRow = ({
   handleInputChange,
   ogChange,
   setShowSuggestion,
+  setDeleteVisible,
+  setSelectedItemId,
 }) => {
+ 
+  const blurTimerRef = useRef(null);
+
+  const handleFocus = () => {
+    if (blurTimerRef.current) {
+      clearTimeout(blurTimerRef.current);
+      blurTimerRef.current = null;
+    }
+    
+    blurTimerRef.current = setTimeout(() => {
+      setShowSuggestion(false);
+      setDeleteVisible(true);
+      setSelectedItemId(item.id);
+    }, 200);
+  };
+
+  const handleBlur = () => {
+    blurTimerRef.current = setTimeout(() => {
+      setSelectedItemId(null);
+      setDeleteVisible(false);
+    }, 150);
+  };
+
   return (
     <View style={{ flexDirection: 'column' }}>
       <View style={{ flexDirection: 'row' }}>
@@ -20,7 +45,8 @@ const BillItemRow = ({
           <TextInput
             style={[styles.inputText, { width: '100%' }]}
             value={item.particulars || ''}
-            onFocus={() => setShowSuggestion(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             onChangeText={(text) =>
               handleInputChange(index, 'particulars', text)
             }
@@ -31,7 +57,8 @@ const BillItemRow = ({
           <TextInput
             style={styles.inputText}
             value={item.rate || ''}
-            onFocus={() => setShowSuggestion(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             onChangeText={(text) => {
               handleInputChange(index, 'rate', text);
               ogChange(index, 'rate', text);
@@ -44,7 +71,8 @@ const BillItemRow = ({
             style={styles.inputText}
             keyboardType="numeric"
             value={item.qty || ''}
-            onFocus={() => setShowSuggestion(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             onChangeText={(text) =>
               handleInputChange(index, 'qty', text)
             }
@@ -67,7 +95,8 @@ const BillItemRow = ({
             style={styles.inputText}
             keyboardType="numeric"
             value={item.originalPrice || ''}
-            onFocus={() => setShowSuggestion(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             onChangeText={(text) =>
               handleInputChange(index, 'originalPrice', text)
             }
@@ -93,8 +122,6 @@ const BillItemRow = ({
     </View>
   );
 };
-
-export default BillItemRow;
 
 const styles = StyleSheet.create({
   tableHorizontalLine1:{
@@ -161,3 +188,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
 });
+
+export default BillItemRow;

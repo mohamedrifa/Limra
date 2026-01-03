@@ -1,5 +1,8 @@
 import React from 'react';
+import { Dimensions } from 'react-native';
 import { View, Text, StyleSheet } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const EmptyTaskList = () => (
   <View style={styles.emptyContainer}>
@@ -12,7 +15,7 @@ const EmptyTaskList = () => (
 
 const styles = StyleSheet.create({
   emptyContainer: {
-    width: '100%',
+    width: width - 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

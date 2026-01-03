@@ -17,6 +17,8 @@ const BillTable = ({
   ogChange,
   setShowSuggestion,
   handleAddRow,
+  setDeleteVisible,
+  setSelectedItemId,
 }) => {
   return (
     <ScrollView
@@ -69,6 +71,8 @@ const BillTable = ({
               handleInputChange={handleInputChange}
               ogChange={ogChange}
               setShowSuggestion={setShowSuggestion}
+              setDeleteVisible={setDeleteVisible}
+              setSelectedItemId={setSelectedItemId}
             />
           )}
         />
